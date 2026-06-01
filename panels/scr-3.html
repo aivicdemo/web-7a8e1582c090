@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web発注プラットフォーム構築管理システム</title>
+    <script><script>
+window.AIVIC_API_URL = "https://jqykrkgdvngp7qvmavufg5tohq0xwdzb.lambda-url.us-east-1.on.aws/";
+window.AIVIC_APP_ID = "session-1780284530342";
+window.AIVIC_SYSTEM_NAME = "Web発注プラットフォームの構築";
+window.AIVIC_TABLES = [];
+window.AIVIC_PRESET_SEED = {};
+window.AIVIC_PAGE_SCREEN_ID = "scr-3";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let currentProjectId = null;\n  \n  // URLパラメータからプロジェクトIDを取得（実際の実装では画面遷移時に渡される）\n  const urlParams = new URLSearchParams(window.location.search);\n  currentProjectId = urlParams.get('id') || (tables[0].records && tables[0].records[0] ? tables[0].records[0].id : 1);\n  \n  // プロジェクトデータを表示する関数\n  function displayProject(project) {\n    if (!project) return;\n    \n    // 基本情報表示部分の更新\n    container.querySelector(\"#display-project-name\").textContent = project.projectName || project.name || \"\";\n    container.querySelector(\"#display-budget\").textContent = project.budget ? `¥${Number(project.budget).toLocaleString()}` : \"\";\n    container.querySelector(\"#display-start-date\").textContent = project.startDate || \"\";\n    container.querySelector(\"#display-end-date\").textContent = project.endDate || \"\";\n    container.querySelector(\"#display-manager\").textContent = project.manager || \"\";\n    \n    // ステータス表示の更新\n    const statusEl = container.querySelector(\"#display-status\");\n    const statusMap = {\n      'planning': { text: '計画中', color: '#6b7280' },\n      'in-progress': { text: '進行中', color: '#10b981' },\n      'review': { text: 'レビュー中', color: '#f59e0b' },\n      'completed': { text: '完了', color: '#3b82f6' },\n      'cancelled': { text: '中止', color: '#ef4444' }\n    };\n    const status = statusMap[project.status] || { text: '不明', color: '#6b7280' };\n    statusEl.textContent = status.text;\n    statusEl.style.background = status.color;\n    \n    // 編集フォームの値を設定\n    container.querySelector(\"#edit-project-name\").value = project.projectName || project.name || \"\";\n    container.querySelector(\"#edit-status\").value = project.status || \"\";\n    container.querySelector(\"#edit-budget\").value = project.budget || \"\";\n    container.querySelector(\"#edit-start-date\").value = project.startDate || \"\";\n    container.querySelector(\"#edit-end-date\").value = project.endDate || \"\";\n    container.querySelector(\"#edit-manager\").value = project.manager || \"\";\n    container.querySelector(\"#edit-priority\").value = project.priority || \"\";\n    container.querySelector(\"#edit-description\").value = project.description || \"\";\n  }\n  \n  // 初期データの読み込み\n  async function loadProject() {\n    try {\n      const projects = await window.aivicApi.list(0);\n      if (projects) {\n        const project = projects.find(p => p.id == currentProjectId) || projects[0];\n        if (project) {\n          displayProject(project);\n        }\n      }\n    } catch (error) {\n      console.error('プロジェクトデータの読み込みに失敗しました:', error);\n      // 初期データがある場合はそれを使用\n      if (tables[0].records && tables[0].records.length > 0) {\n        displayProject(tables[0].records[0]);\n      }\n    }\n  }\n  \n  // 保存ボタンのイベントリスナー\n  container.querySelector(\"#btn-save\").addEventListener(\"click\", async () => {\n    const formData = {\n      projectName: container.querySelector(\"#edit-project-name\").value,\n      status: container.querySelector(\"#edit-status\").value,\n      budget: container.querySelector(\"#edit-budget\").value,\n      startDate: container.querySelector(\"#edit-start-date\").value,\n      endDate: container.querySelector(\"#edit-end-date\").value,\n      manager: container.querySelector(\"#edit-manager\").value,\n      priority: container.querySelector(\"#edit-priority\").value,\n      description: container.querySelector(\"#edit-description\").value\n    };\n    \n    try {\n      const updated = await window.aivicApi.update(0, currentProjectId, formData);\n      if (updated) {\n        displayProject(updated);\n        alert('プロジェクト情報を更新しました');\n      } else {\n        alert('更新に失敗しました');\n      }\n    } catch (error) {\n      console.error('更新エラー:', error);\n      alert('更新中にエラーが発生しました');\n    }\n  });\n  \n  // キャンセルボタンのイベントリスナー\n  container.querySelector(\"#btn-cancel\").addEventListener(\"click\", () => {\n    loadProject(); // 元のデータを再読み込み\n  });\n  \n  // 戻るボタンのイベントリスナー\n  container.querySelector(\"#btn-back\").addEventListener(\"click\", () => {\n    window.showScreen(\"scr-2\"); // Web発注プラットフォームの構築データ一覧\n  });\n  \n  // 関連ボタンのイベントリスナー\n  container.querySelector(\"#btn-view-tasks\").addEventListener(\"click\", () => {\n    window.showScreen(\"scr-1\"); // ダッシュボード\n  });\n  \n  container.querySelector(\"#btn-view-files\").addEventListener(\"click\", () => {\n    window.showScreen(\"scr-4\"); // 設定画面\n  });\n  \n  container.querySelector(\"#btn-view-history\").addEventListener(\"click\", () => {\n    window.showScreen(\"scr-2\"); // データ一覧\n  });\n  \n  // 初期データの読み込み実行\n  loadProject();\n}";
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></script>
+    <style>
+        :root {
+            --primary: #2e844a;
+            --primary-hover: #1e6738;
+            --primary-light: #e8f5e8;
+            --bg-main: #f8f9fa;
+            --bg-card: #ffffff;
+            --bg-sidebar: #f4f6f9;
+            --border: #d0d7de;
+            --border-light: #e8eaed;
+            --text: #181818;
+            --text-muted: #4a5568;
+            --text-light: #6b7280;
+            --top-bar-bg: #ffffff;
+            --top-bar-border: #e1e5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius-sm: 4px;
+            --radius: 6px;
+            --radius-lg: 8px;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-main);
+            color: var(--text);
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--top-bar-bg);
+        }
+
+        .logo {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo::before {
+            content: "🌐";
+            font-size: 18px;
+        }
+
+        .nav-section {
+            padding: 12px 0;
+        }
+
+        .nav-section-title {
+            padding: 0 20px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 8px 20px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(46, 132, 74, 0.08);
+            color: var(--primary);
+        }
+
+        .nav-item.aivic-active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-item.aivic-active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--primary);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            background: var(--top-bar-bg);
+            border-bottom: 1px solid var(--top-bar-border);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+            color: white;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .kpi-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .kpi-change.positive {
+            color: var(--success);
+        }
+
+        .kpi-change.negative {
+            color: var(--danger);
+        }
+
+        .data-table {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .search-box {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            width: 240px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--bg-main);
+            padding: 10px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 13px;
+        }
+
+        .table tr:hover {
+            background: var(--bg-main);
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-inactive {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .detail-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .detail-main {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .detail-sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .settings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .settings-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .settings-section p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .content-area {
+                padding: 16px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .detail-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">Web発注プラットフォーム</div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">メイン</div>
+                <button class="nav-item" data-aivic-nav="scr-1" onclick="showScreen('scr-1')">
+                    ダッシュボード
+                </button>
+                <button class="nav-item" data-aivic-nav="scr-2" onclick="showScreen('scr-2')">
+                    データ一覧
+                </button>
+                <button class="nav-item" data-aivic-nav="scr-3" onclick="showScreen('scr-3')">
+                    詳細・編集
+                </button>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">管理</div>
+                <button class="nav-item" data-aivic-nav="scr-4" onclick="showScreen('scr-4')">
+                    設定
+                </button>
+                <a href="./login.html" class="nav-item">
+                    ログアウト
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 class="page-title">Web発注プラットフォーム構築管理</h1>
+                <div class="top-bar-actions">
+                    <button class="btn btn-primary">新規作成</button>
+                    <button class="btn">エクスポート</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <div data-aivic-panel="scr-1" style="display:none"></div>
+                            </div>
+                            <div class="kpi-value">1,247</div>
+                            <div class="kpi-change positive">+12.5% 前月比</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-title">処理中案件</div>
+                            </div>
+                            <div class="kpi-value">89</div>
+                            <div class="kpi-change negative">+3件 昨日比</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-title">完了率</div>
+                            </div>
+                            <div class="kpi-value">94.2%</div>
+                            <div class="kpi-change positive">+1.8% 前月比</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <div class="kpi-title">平均処理時間</div>
+                            </div>
+                            <div class="kpi-value">2.4日</div>
+                            <div class="kpi-change positive">-0.3日 前月比</div>
+                        </div>
+                    </div>
+
+                    <div class="data-table">
+                        <div class="table-header">
+                            <div class="table-title">最近の発注状況</div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>発注ID</th>
+                                    <th>案件名</th>
+                                    <th>発注者</th>
+                                    <th>ステータス</th>
+                                    <th>作成日</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#WO-2024-001</td>
+                                    <td>ECサイト構築</td>
+                                    <td>田中太郎</td>
+                                    <td><span class="status-badge status-active">進行中</span></td>
+                                    <td>2024-01-15</td>
+                                </tr>
+                                <tr>
+                                    <td>#WO-2024-002</td>
+                                    <td>コーポレートサイト</td>
+                                    <td>佐藤花子</td>
+                                    <td><span class="status-badge status-pending">承認待ち</span></td>
+                                    <td>2024-01-14</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div data-aivic-panel="scr-2" style="display:none"></div>
+                            <input type="search" class="search-box" placeholder="発注ID、案件名で検索...">
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>発注ID</th>
+                                    <th>案件名</th>
+                                    <th>発注者</th>
+                                    <th>予算</th>
+                                    <th>納期</th>
+                                    <th>ステータス</th>
+                                    <th>作成日</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#WO-2024-001</td>
+                                    <td>ECサイト構築プロジェクト</td>
+                                    <td>田中太郎</td>
+                                    <td>¥500,000</td>
+                                    <td>2024-03-31</td>
+                                    <td><span class="status-badge status-active">進行中</span></td>
+                                    <td>2024-01-15</td>
+                                    <td><button class="btn">編集</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#WO-2024-002</td>
+                                    <td>コーポレートサイトリニューアル</td>
+                                    <td>佐藤花子</td>
+                                    <td>¥300,000</td>
+                                    <td>2024-02-28</td>
+                                    <td><span class="status-badge status-pending">承認待ち</span></td>
+                                    <td>2024-01-14</td>
+                                    <td><button class="btn">編集</button></td>
+                                </tr>
+                                <tr>
+                                    <td>#WO-2024-003</td>
+                                    <td>業務システム開発</td>
+                                    <td>鈴木一郎</td>
+                                    <td>¥1,200,000</td>
+                                    <td>2024-06-30</td>
+                                    <td><span class="status-badge status-inactive">下書き</span></td>
+                                    <td>2024-01-13</td>
+                                    <td><button class="btn">編集</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div data-aivic-panel="scr-3" style="display:block"><div class="flex gap-3 h-full">
+  <!-- 左側: 基本情報表示 -->
+  <div class="w-1/3 bg-card rounded-lg p-4 border border-gray-200">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold" style="color: var(--text);">プロジェクト基本情報</h2>
+      <button class="action-btn secondary" data-testid="back-button" id="btn-back">
+        ← 一覧に戻る
+      </button>
+    </div>
+    
+    <div class="space-y-3">
+      <div>
+        <label class="block text-sm font-medium mb-1" style="color: var(--text-muted);">プロジェクト名</label>
+        <div class="p-2 rounded border" style="background: var(--bg-main); border-color: rgba(255,255,255,0.18); color: var(--text);" id="display-project-name">
+          Web発注プラットフォームの構築
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1" style="color: var(--text-muted);">ステータス</label>
+        <div class="inline-block px-2 py-1 rounded text-sm font-medium" id="display-status" style="background: #10b981; color: #fff;">
+          進行中
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1" style="color: var(--text-muted);">予算</label>
+        <div class="p-2 rounded border" style="background: var(--bg-main); border-color: rgba(255,255,255,0.18); color: var(--text);" id="display-budget">
+          ¥5,000,000
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1" style="color: var(--text-muted);">開始日</label>
+        <div class="p-2 rounded border" style="background: var(--bg-main); border-color: rgba(255,255,255,0.18); color: var(--text);" id="display-start-date">
+          2024-01-15
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1" style="color: var(--text-muted);">完了予定日</label>
+        <div class="p-2 rounded border" style="background: var(--bg-main); border-color: rgba(255,255,255,0.18); color: var(--text);" id="display-end-date">
+          2024-06-30
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1" style="color: var(--text-muted);">担当者</label>
+        <div class="p-2 rounded border" style="background: var(--bg-main); border-color: rgba(255,255,255,0.18); color: var(--text);" id="display-manager">
+          田中 太郎
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 右側: 編集フォーム -->
+  <div class="flex-1 bg-card rounded-lg p-4 border border-gray-200">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold" style="color: var(--text);">プロジェクト編集</h2>
+      <div class="flex gap-2">
+        <button class="action-btn secondary" data-testid="cancel-button" id="btn-cancel">
+          キャンセル
+        </button>
+        <button class="action-btn" data-testid="save-button" id="btn-save">
+          保存
+        </button>
+      </div>
+    </div>
+    
+    <form class="grid grid-cols-2 gap-4">
+      <div class="col-span-2">
+        <label for="edit-project-name" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">プロジェクト名</label>
+        <input 
+          type="text" 
+          id="edit-project-name" 
+          name="projectName"
+          data-testid="project-name-input"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+          value="Web発注プラットフォームの構築"
+        />
+      </div>
+      
+      <div>
+        <label for="edit-status" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">ステータス</label>
+        <select 
+          id="edit-status" 
+          name="status"
+          data-testid="status-select"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+        >
+          <option value="">選択してください</option>
+          <option value="planning">計画中</option>
+          <option value="in-progress" selected>進行中</option>
+          <option value="review">レビュー中</option>
+          <option value="completed">完了</option>
+          <option value="cancelled">中止</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="edit-budget" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">予算</label>
+        <input 
+          type="number" 
+          id="edit-budget" 
+          name="budget"
+          data-testid="budget-input"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+          value="5000000"
+        />
+      </div>
+      
+      <div>
+        <label for="edit-start-date" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">開始日</label>
+        <input 
+          type="date" 
+          id="edit-start-date" 
+          name="startDate"
+          data-testid="start-date-input"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+          value="2024-01-15"
+        />
+      </div>
+      
+      <div>
+        <label for="edit-end-date" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">完了予定日</label>
+        <input 
+          type="date" 
+          id="edit-end-date" 
+          name="endDate"
+          data-testid="end-date-input"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+          value="2024-06-30"
+        />
+      </div>
+      
+      <div>
+        <label for="edit-manager" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">担当者</label>
+        <select 
+          id="edit-manager" 
+          name="manager"
+          data-testid="manager-select"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+        >
+          <option value="">選択してください</option>
+          <option value="田中 太郎" selected>田中 太郎</option>
+          <option value="佐藤 花子">佐藤 花子</option>
+          <option value="鈴木 次郎">鈴木 次郎</option>
+          <option value="高橋 美咲">高橋 美咲</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="edit-priority" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">優先度</label>
+        <select 
+          id="edit-priority" 
+          name="priority"
+          data-testid="priority-select"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+        >
+          <option value="">選択してください</option>
+          <option value="low">低</option>
+          <option value="medium" selected>中</option>
+          <option value="high">高</option>
+          <option value="urgent">緊急</option>
+        </select>
+      </div>
+      
+      <div class="col-span-2">
+        <label for="edit-description" class="block text-sm font-medium mb-1" style="color: var(--text-muted);">プロジェクト概要</label>
+        <textarea 
+          id="edit-description" 
+          name="description"
+          data-testid="description-input"
+          rows="4"
+          class="w-full p-2 rounded border" 
+          style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); color: var(--text);"
+          placeholder="プロジェクトの詳細な説明を入力してください"
+        >ECサイトの発注機能を中心とした包括的なWebプラットフォームの構築。ユーザー管理、商品管理、決済システム、在庫管理などの機能を統合したシステムを開発する。</textarea>
+      </div>
+    </form>
+    
+    <!-- 関連情報セクション -->
+    <div class="mt-6 pt-4 border-t" style="border-color: var(--border);">
+      <h3 class="text-md font-semibold mb-3" style="color: var(--text);">関連情報</h3>
+      
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-main p-3 rounded border" style="background: var(--bg-main); border-color: var(--border);">
+          <div class="text-sm" style="color: var(--text-muted);">進捗率</div>
+          <div class="text-xl font-bold" style="color: var(--primary);">65%</div>
+        </div>
+        
+        <div class="bg-main p-3 rounded border" style="background: var(--bg-main); border-color: var(--border);">
+          <div class="text-sm" style="color: var(--text-muted);">消化予算</div>
+          <div class="text-xl font-bold" style="color: var(--text);">¥3,250,000</div>
+        </div>
+        
+        <div class="bg-main p-3 rounded border" style="background: var(--bg-main); border-color: var(--border);">
+          <div class="text-sm" style="color: var(--text-muted);">残り日数</div>
+          <div class="text-xl font-bold" style="color: var(--text);">45日</div>
+        </div>
+      </div>
+      
+      <div class="mt-4 flex gap-2">
+        <button class="action-btn secondary" data-testid="view-tasks-button" id="btn-view-tasks">
+          タスク一覧を見る
+        </button>
+        <button class="action-btn secondary" data-testid="view-files-button" id="btn-view-files">
+          関連ファイル
+        </button>
+        <button class="action-btn secondary" data-testid="view-history-button" id="btn-view-history">
+          変更履歴
+        </button>
+      </div>
+    </div>
+  </div>
+</div></label>
+                                <input type="text" class="form-input" value="ECサイト構築プロジェクト">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">発注者</label>
+                                <input type="text" class="form-input" value="田中太郎">
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label">予算</label>
+                                    <input type="text" class="form-input" value="¥500,000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">納期</label>
+                                    <input type="date" class="form-input" value="2024-03-31">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">要件詳細</label>
+                                <textarea class="form-input" rows="6" placeholder="発注要件の詳細を入力してください..."></textarea>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                                <button class="btn btn-primary">保存</button>
+                                <button class="btn">キャンセル</button>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-sidebar">
+                            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">発注情報</h3>
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">ステータス</div>
+                                <span class="status-badge status-active">進行中</span>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">作成日</div>
+                                <div style="font-size: 13px;">2024-01-15 10:30</div>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">最終更新</div>
+                                <div style="font-size: 13px;">2024-01-20 14:22</div>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">担当者</div>
+                                <div style="font-size: 13px;">山田次郎</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-aivic-panel="scr-4" style="display:none"></p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">デフォルト承認者</label>
+                                <input type="text" class="form-input" placeholder="承認者のメールアドレス">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">自動通知設定</label>
+                                <select class="form-input">
+                                    <option>即座に通知</option>
+                                    <option>1時間後</option>
+                                    <option>翌営業日</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>システム設定</h3>
+                            <p>プラットフォーム全体の動作設定を調整します。</p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">データ保持期間（日）</label>
+                                <input type="number" class="form-input" value="365">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">バックアップ頻度</label>
+                                <select class="form-input">
+                                    <option>毎日</option>
+                                    <option>毎週</option>
+                                    <option>毎月</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>ユーザー管理</h3>
+                            <p>アクセス権限とユーザーアカウントを管理します。</p>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn btn-primary">ユーザー追加</button>
+                                <button class="btn">権限設定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+(function() {
+  var TABLE_DEFS = window.AIVIC_TABLES || [];
+  var PRESET_SEED = window.AIVIC_PRESET_SEED || {};
+  var SYSTEM_NAME = window.AIVIC_SYSTEM_NAME || "";
+  var APP_ID = window.AIVIC_APP_ID || "";
+  var API_URL = (window.AIVIC_API_URL && window.AIVIC_API_URL !== "REPLACE_WITH_API_URL")
+    ? window.AIVIC_API_URL : window.location.origin;
+
+  // 通知 helper（SPA 版と同じ）
+  window.aivicNotify = (function() {
+    function ensureContainer() {
+      var c = document.getElementById("aivic-toast-container");
+      if (c) return c;
+      c = document.createElement("div");
+      c.id = "aivic-toast-container";
+      c.style.cssText = "position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:360px;";
+      document.body.appendChild(c);
+      return c;
+    }
+    function show(msg, type) {
+      var c = ensureContainer();
+      var el = document.createElement("div");
+      el.textContent = msg;
+      el.style.cssText = "padding:10px 16px;border-radius:8px;font-size:13px;line-height:1.4;pointer-events:auto;color:#fff;background:" + (type === "error" ? "#dc2626" : "#d97706");
+      c.appendChild(el);
+      setTimeout(function() {
+        el.style.transition = "opacity .3s";
+        el.style.opacity = "0";
+        setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
+      }, type === "error" ? 6000 : 4500);
+    }
+    return {
+      error: function(msg) { show("❌ " + msg, "error"); },
+      warn:  function(msg) { show("⚠️ " + msg, "warn"); },
+    };
+  })();
+
+  // CRUD API（SPA 版と同じ）
+  window.aivicApi = (function() {
+    function dbErr(op) { window.aivicNotify.error("データベースエラー（" + op + "）: APIサーバーに接続できません。"); }
+    function newId() { return typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "id-" + Date.now() + "-" + Math.random().toString(36).slice(2); }
+    function q(i) {
+      var t = TABLE_DEFS[i];
+      var dbP = (window.AIVIC_DB_TYPE && window.AIVIC_DB_TYPE !== "dynamodb") ? "&db=" + encodeURIComponent(window.AIVIC_DB_TYPE) : "";
+      return "?app=" + encodeURIComponent(APP_ID) + "&system=" + encodeURIComponent(SYSTEM_NAME) + "&table=" + encodeURIComponent(t ? t.tableName : "table" + i) + dbP;
+    }
+    return {
+      list: async function(tableIndex) {
+        if (!API_URL) return [];
+        try { var r = await fetch(API_URL + "/api/" + tableIndex + q(tableIndex)); var d = await r.json(); return Array.isArray(d) ? d : (d.items || []); }
+        catch(e) { dbErr("データ取得"); return []; }
+      },
+      save: async function(tableIndex, item) {
+        if (!API_URL) { dbErr("保存"); return null; }
+        var now = new Date().toISOString();
+        var rec = Object.assign({}, item, { id: item.id || newId(), createdAt: item.createdAt || now, updatedAt: now });
+        try { var r = await fetch(API_URL + "/api/" + tableIndex + q(tableIndex), { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(rec) }); return await r.json(); }
+        catch(e) { dbErr("保存"); return null; }
+      },
+      update: async function(tableIndex, id, changes) {
+        if (!API_URL) { dbErr("更新"); return null; }
+        try { var r = await fetch(API_URL + "/api/" + tableIndex + "/" + id + q(tableIndex), { method:"PUT", headers:{"Content-Type":"application/json"}, body:JSON.stringify(Object.assign({}, changes, {updatedAt: new Date().toISOString()})) }); return await r.json(); }
+        catch(e) { dbErr("更新"); return null; }
+      },
+      delete: async function(tableIndex, id) {
+        if (!API_URL) { dbErr("削除"); return {deleted:false}; }
+        try { await fetch(API_URL + "/api/" + tableIndex + "/" + id + q(tableIndex), {method:"DELETE"}); return {deleted:true}; }
+        catch(e) { dbErr("削除"); return {deleted:false}; }
+      },
+    };
+  })();
+
+  // showScreen はマルチページ構成ではページ遷移として動く。
+  // パネル切替 (旧 SPA 動作) ではなく ./<id>.html への navigate に再定義する。
+  // 既存の AI 生成 shell が onclick="showScreen('x')" の形で書いていても透過的に動く。
+  //
+  // 防御層:
+  // (a) 同じ画面 ID なら no-op（AIVIC_PAGE_SCREEN_ID 一致 / pathname 一致のどちらか）
+  // (b) 同じ navigate を 100ms 以内に繰り返したら break loop（onclick 連打ではなく自動ループ対策）
+  // (c) DOMContentLoaded 直後 1.5s 以内の「自動 navigate」は警告 + 抑制（手動 click は通す）
+  var _aivicNavLastTime = 0;
+  var _aivicNavLastTarget = "";
+  var _aivicReady = false;
+  window.showScreen = function(screenId) {
+    if (!screenId) return;
+    if (screenId === window.AIVIC_PAGE_SCREEN_ID) return; // 既に該当ページに居る
+    // pathname ベースの保険: AIVIC_PAGE_SCREEN_ID が未設定でも、現在 URL と一致したら抑制
+    var targetPath = './' + encodeURIComponent(screenId) + '.html';
+    var currentName = (window.location.pathname.split('/').pop() || '');
+    if (currentName === (encodeURIComponent(screenId) + '.html') ||
+        currentName === (screenId + '.html')) {
+      return;
+    }
+    var now = Date.now();
+    if (_aivicNavLastTarget === targetPath && (now - _aivicNavLastTime) < 100) {
+      console.warn('[aivic] showScreen 連続呼び出し検知。無限ループ防止のため抑制:', screenId);
+      return;
+    }
+    if (!_aivicReady) {
+      // ページロード直後の自動 navigate は AI shell の load-time 副作用の可能性が高い。
+      // ボタンクリック等のユーザー操作は ready 後なので影響しない。
+      console.warn('[aivic] DOMContentLoaded 前の showScreen 呼び出し。抑制:', screenId);
+      return;
+    }
+    _aivicNavLastTime = now;
+    _aivicNavLastTarget = targetPath;
+    window.location.href = targetPath;
+  };
+
+  // 初回マウント時のサンプルデータ投入
+  function seedAllIfEmpty() {
+    if (!API_URL) return Promise.resolve();
+    return Promise.all(TABLE_DEFS.map(function(t, i) {
+      var preset = PRESET_SEED[t.tableName];
+      if (!Array.isArray(preset) || preset.length === 0) return Promise.resolve();
+      return window.aivicApi.list(i).then(function(existing) {
+        if (existing && existing.length > 0) return;
+        return Promise.all(preset.map(function(row) { return window.aivicApi.save(i, row); }));
+      }).catch(function() {});
+    }));
+  }
+
+  // ── 初期表示: このページ専用の panel に initFn を実行 ──
+  // window.AIVIC_PAGE_SCREEN_ID と AIVIC_PAGE_INIT_JS は composeMultipagePages
+  // でページ単位に埋め込まれる。
+  document.addEventListener("DOMContentLoaded", function() {
+    // 1.5 秒後に必ず _aivicReady を立てる（initFn が走らないページや失敗ページでも
+    // ユーザーが操作できるようにする保険）。initFn 完了時にも立てるので早い方が勝つ。
+    setTimeout(function() { _aivicReady = true; }, 1500);
+    var pageScreenId = window.AIVIC_PAGE_SCREEN_ID;
+    if (!pageScreenId) return;
+
+    // sidebar / nav の active class を付与（現在ページのリンクを強調）
+    document.querySelectorAll('[data-aivic-nav]').forEach(function(btn) {
+      var isActive = btn.getAttribute("data-aivic-nav") === pageScreenId;
+      btn.classList.toggle("aivic-active", isActive);
+      btn.setAttribute("aria-current", isActive ? "page" : "false");
+    });
+
+    var container = document.querySelector('[data-aivic-panel="' + pageScreenId + '"]');
+    if (!container) return;
+
+    // **content 要素の hidden 強制除去（2026-05-24 Playwright 大量 fail 対応）**:
+    // AI が生成した panel HTML には class="hidden" / hidden 属性 / style="display:none"
+    // が content 要素（#xxx-tbody / #xxx-list / [data-testid="error-message"] 等）に付いて
+    // いることがある。それを Playwright が toBeVisible() で待ち続けて timeout する事故が頻発。
+    //
+    // ポリシー: panel コンテナ配下の全要素について以下を実行:
+    //   - class="hidden" / display:none / hidden 属性を **content 要素では除去**
+    //   - **modal 系**（.modal, .modal-backdrop, [role="dialog"], [data-modal] 等）は除外
+    //     （これらは仕様上初期非表示が正しい）
+    var isModalLike = function(el) {
+      if (!el || !el.classList) return false;
+      var cn = String(el.className || "");
+      if (/modal|dialog|overlay|popup|dropdown|tooltip/i.test(cn)) return true;
+      var role = el.getAttribute && el.getAttribute("role");
+      if (role === "dialog" || role === "alertdialog" || role === "tooltip" || role === "menu") return true;
+      if (el.hasAttribute && (el.hasAttribute("data-modal") || el.hasAttribute("data-dropdown") || el.hasAttribute("data-popup"))) return true;
+      return false;
+    };
+    var unhideContentElements = function(root) {
+      var all = root.querySelectorAll('.hidden, [hidden], [style*="display:none"], [style*="display: none"]');
+      for (var k = 0; k < all.length; k++) {
+        var el = all[k];
+        // modal 系は触らない
+        if (isModalLike(el)) continue;
+        // parent chain で modal 内なら触らない
+        var p = el.parentElement;
+        var insideModal = false;
+        while (p && p !== root) {
+          if (isModalLike(p)) { insideModal = true; break; }
+          p = p.parentElement;
+        }
+        if (insideModal) continue;
+        // 除去
+        el.classList.remove('hidden');
+        el.removeAttribute('hidden');
+        if (el.style && el.style.display === 'none') el.style.display = '';
+      }
+    };
+    try { unhideContentElements(container); } catch (e) { console.warn('[aivic] unhideContent failed:', e); }
+
+    var initJsSource = window.AIVIC_PAGE_INIT_JS;
+    if (!initJsSource) {
+      // initJs が無くてもサンプルデータ投入は走らせる
+      seedAllIfEmpty();
+      return;
+    }
+    var initFn = null;
+    try {
+      initFn = (new Function("return (" + initJsSource + ")"))();
+    } catch (e) {
+      console.error("[aivic] initJs compile error:", pageScreenId, e);
+      return;
+    }
+    if (typeof initFn !== "function") return;
+
+    seedAllIfEmpty().then(function() {
+      return Promise.all(TABLE_DEFS.map(function(t, i) {
+        return window.aivicApi.list(i)
+          .then(function(records) { return Object.assign({}, t, { records: records }); })
+          .catch(function() { return Object.assign({}, t, { records: [] }); });
+      }));
+    }).then(function(tables) {
+      try { initFn(container, API_URL, tables); } catch (e) { console.error("[aivic] initFn error:", pageScreenId, e); }
+      // 初期 panel init が一巡したら _aivicReady を立てる。以降のユーザー操作 (onclick) で
+      // showScreen が呼ばれた場合は通常通り navigate する。
+      _aivicReady = true;
+    });
+  });
+})();
+
+</script>
+</body>
+</html>
