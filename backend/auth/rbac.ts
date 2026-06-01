@@ -3,51 +3,53 @@ export type Role = 'admin' | 'operator' | 'viewer';
 export interface User {
   id: string;
   role: Role;
-  permissions: string[];
+  email?: string;
 }
 
-export const PERMISSIONS = {
-  READ_RESOURCES: 'read:resources',
-  WRITE_RESOURCES: 'write:resources',
-  DELETE_RESOURCES: 'delete:resources',
-  BULK_IMPORT: 'bulk:import'
-} as const;
+export interface Permission {
+  resource: string;
+  action: 'create' | 'read' | 'update' | 'delete' | 'bulk';
+}
 
-export const ROLE_PERMISSIONS: Record<Role, string[]> = {
+const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   admin: [
-    PERMISSIONS.READ_RESOURCES,
-    PERMISSIONS.WRITE_RESOURCES,
-    PERMISSIONS.DELETE_RESOURCES,
-    PERMISSIONS.BULK_IMPORT
+    { resource: 'resources', action: 'create' },
+    { resource: 'resources', action: 'read' },
+    { resource: 'resources', action: 'update' },
+    { resource: 'resources', action: 'delete' },
+    { resource: 'resources', action: 'bulk' }
   ],
   operator: [
-    PERMISSIONS.READ_RESOURCES,
-    PERMISSIONS.WRITE_RESOURCES,
-    PERMISSIONS.BULK_IMPORT
+    { resource: 'resources', action: 'create' },
+    { resource: 'resources', action: 'read' },
+    { resource: 'resources', action: 'update' },
+    { resource: 'resources', action: 'bulk' }
   ],
   viewer: [
-    PERMISSIONS.READ_RESOURCES
+    { resource: 'resources', action: 'read' }
   ]
 };
 
-export function hasPermission(role: Role, permission: string): boolean {
-  return ROLE_PERMISSIONS[role].includes(permission);
+export function hasPermission(user: User, resource: string, action: string): boolean {
+  const permissions = ROLE_PERMISSIONS[user.role] || [];
+  return permissions.some(p => p.resource === resource && p.action === action);
 }
 
-export function extractUserFromEvent(event: any): User | null {
+export function extractUserFromEvent(event: any): User {
+  const authHeader = event.headers?.Authorization || event.headers?.authorization;
+  if (!authHeader) {
+    throw new Error('Missing authorization header');
+  }
+  
   try {
-    const authHeader = event.headers?.Authorization || event.headers?.authorization;
-    if (!authHeader) return null;
-    
     const token = authHeader.replace('Bearer ', '');
-    const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-    
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
     return {
-      id: decoded.sub || decoded.userId,
-      role: decoded.role || 'viewer',
-      permissions: ROLE_PERMISSIONS[decoded.role || 'viewer']
+      id: payload.sub || payload.userId || 'unknown',
+      role: payload.role || 'viewer',
+      email: payload.email
     };
-  } catch {
-    return null;
+  } catch (error) {
+    throw new Error('Invalid token format');
   }
 }
