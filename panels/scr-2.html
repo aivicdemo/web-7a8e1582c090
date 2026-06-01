@@ -1,51 +1,55 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web発注プラットフォーム構築管理システム</title>
-    <script><script>
+    <title>Web発注プラットフォーム構築管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
 window.AIVIC_API_URL = "https://jqykrkgdvngp7qvmavufg5tohq0xwdzb.lambda-url.us-east-1.on.aws/";
 window.AIVIC_APP_ID = "session-1780284530342";
 window.AIVIC_SYSTEM_NAME = "Web発注プラットフォームの構築";
 window.AIVIC_TABLES = [];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-2";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let currentData = [];\n  let sortField = '';\n  let sortDirection = 'asc';\n\n  // 1. テーブル再描画関数\n  function renderRows(rows) {\n    const tbody = container.querySelector('#project-tbody');\n    if (!rows || rows.length === 0) {\n      tbody.innerHTML = '<tr><td colspan=\"8\" class=\"text-center py-8\" style=\"color: var(--text-muted);\">データがありません</td></tr>';\n      return;\n    }\n\n    tbody.innerHTML = rows.map(r => {\n      const statusColor = getStatusColor(r.status || '');\n      const priorityColor = getPriorityColor(r.priority || '');\n      const progress = r.progress || 0;\n      \n      return `\n        <tr data-id=\"${r.id}\" class=\"border-b hover:bg-opacity-50 cursor-pointer\" style=\"border-color: rgba(255,255,255,0.08);\" onclick=\"window.showScreen('scr-3')\">\n          <td class=\"py-3 px-4\">\n            <div class=\"font-medium\" style=\"color: var(--text);\">${r.projectName || ''}</div>\n            <div class=\"text-xs mt-1\" style=\"color: var(--text-muted);\">${r.description || ''}</div>\n          </td>\n          <td class=\"py-3 px-4\" style=\"color: var(--text);\">${r.vendor || ''}</td>\n          <td class=\"py-3 px-4\">\n            <span class=\"px-2 py-1 text-xs font-medium rounded-full\" style=\"background: ${statusColor}; color: #fff;\">\n              ${r.status || ''}\n            </span>\n          </td>\n          <td class=\"py-3 px-4\">\n            <span class=\"px-2 py-1 text-xs font-medium rounded-full\" style=\"background: ${priorityColor}; color: #fff;\">\n              ${r.priority || ''}\n            </span>\n          </td>\n          <td class=\"py-3 px-4\" style=\"color: var(--text);\">¥${(r.budget || 0).toLocaleString()}</td>\n          <td class=\"py-3 px-4\" style=\"color: var(--text);\">${formatDate(r.startDate)}</td>\n          <td class=\"py-3 px-4\">\n            <div class=\"flex items-center gap-2\">\n              <div class=\"flex-1 h-2 rounded-full\" style=\"background: rgba(255,255,255,0.1);\">\n                <div class=\"h-full rounded-full\" style=\"background: var(--primary); width: ${progress}%;\"></div>\n              </div>\n              <span class=\"text-xs\" style=\"color: var(--text-muted);\">${progress}%</span>\n            </div>\n          </td>\n          <td class=\"py-3 px-4 text-center\">\n            <div class=\"flex gap-1 justify-center\">\n              <button class=\"action-btn secondary edit-btn\" data-id=\"${r.id}\" onclick=\"event.stopPropagation(); window.showScreen('scr-3');\">編集</button>\n              <button class=\"action-btn secondary delete-btn\" data-id=\"${r.id}\" onclick=\"event.stopPropagation();\">削除</button>\n            </div>\n          </td>\n        </tr>\n      `;\n    }).join('');\n  }\n\n  // KPI更新関数\n  function updateKPIs(rows) {\n    const total = rows.length;\n    const active = rows.filter(r => ['企画中', '設計中', '開発中', 'テスト中'].includes(r.status)).length;\n    const completed = rows.filter(r => r.status === '完了').length;\n    const totalBudget = rows.reduce((sum, r) => sum + (r.budget || 0), 0);\n\n    container.querySelector('#kpi-total').textContent = total;\n    container.querySelector('#kpi-active').textContent = active;\n    container.querySelector('#kpi-completed').textContent = completed;\n    container.querySelector('#kpi-budget').textContent = `¥${totalBudget.toLocaleString()}`;\n  }\n\n  // ユーティリティ関数\n  function getStatusColor(status) {\n    const colors = {\n      '企画中': '#6b7280',\n      '設計中': '#f59e0b',\n      '開発中': '#10b981',\n      'テスト中': '#3b82f6',\n      '完了': '#059669',\n      '保留': '#ef4444'\n    };\n    return colors[status] || '#6b7280';\n  }\n\n  function getPriorityColor(priority) {\n    const colors = {\n      '高': '#ef4444',\n      '中': '#f59e0b',\n      '低': '#10b981'\n    };\n    return colors[priority] || '#6b7280';\n  }\n\n  function formatDate(dateStr) {\n    if (!dateStr) return '';\n    const date = new Date(dateStr);\n    return date.toLocaleDateString('ja-JP');\n  }\n\n  // 2. 初期データ表示\n  currentData = tables[0]?.records || [];\n  renderRows(currentData);\n  updateKPIs(currentData);\n\n  // データを最新に更新\n  window.aivicApi.list(0).then(rows => {\n    if (rows) {\n      currentData = rows;\n      renderRows(currentData);\n      updateKPIs(currentData);\n    }\n  });\n\n  // 3. 検索機能\n  container.querySelector('#btn-search').addEventListener('click', async () => {\n    const keyword = container.querySelector('#input-search').value.toLowerCase();\n    const statusFilter = container.querySelector('#filter-status').value;\n    const priorityFilter = container.querySelector('#filter-priority').value;\n\n    const rows = await window.aivicApi.list(0);\n    if (!rows) return;\n\n    let filtered = rows.filter(r => {\n      const matchKeyword = !keyword || \n        (r.projectName || '').toLowerCase().includes(keyword) ||\n        (r.vendor || '').toLowerCase().includes(keyword) ||\n        (r.description || '').toLowerCase().includes(keyword);\n      \n      const matchStatus = !statusFilter || r.status === statusFilter;\n      const matchPriority = !priorityFilter || r.priority === priorityFilter;\n\n      return matchKeyword && matchStatus && matchPriority;\n    });\n\n    currentData = filtered;\n    renderRows(filtered);\n    updateKPIs(filtered);\n  });\n\n  // 4. ソート機能\n  container.addEventListener('click', (e) => {\n    const sortHeader = e.target.closest('[data-sort]');\n    if (sortHeader) {\n      const field = sortHeader.dataset.sort;\n      if (sortField === field) {\n        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';\n      } else {\n        sortField = field;\n        sortDirection = 'asc';\n      }\n\n      const sorted = [...currentData].sort((a, b) => {\n        let aVal = a[field] || '';\n        let bVal = b[field] || '';\n        \n        if (field === 'budget') {\n          aVal = parseFloat(aVal) || 0;\n          bVal = parseFloat(bVal) || 0;\n        } else if (field === 'startDate') {\n          aVal = new Date(aVal);\n          bVal = new Date(bVal);\n        }\n\n        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;\n        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;\n        return 0;\n      });\n\n      renderRows(sorted);\n    }\n  });\n\n  // 5. 削除機能（イベントデリゲーション）\n  container.addEventListener('click', async (e) => {\n    const deleteBtn = e.target.closest('.delete-btn');\n    if (deleteBtn) {\n      if (!confirm('この案件を削除しますか？')) return;\n      \n      const id = deleteBtn.dataset.id;\n      await window.aivicApi.delete(0, id);\n      \n      const rows = await window.aivicApi.list(0);\n      if (rows) {\n        currentData = rows;\n        renderRows(rows);\n        updateKPIs(rows);\n      }\n    }\n  });\n\n  // 6. CSVエクスポート機能\n  container.querySelector('#btn-export').addEventListener('click', async () => {\n    const rows = await window.aivicApi.list(0);\n    if (!rows || rows.length === 0) {\n      alert('エクスポートするデータがありません');\n      return;\n    }\n\n    const headers = ['案件名', '発注先', 'ステータス', '優先度', '予算', '開始日', '進捗', '説明'];\n    const csvData = [\n      headers.join(','),\n      ...rows.map(r => [\n        `\"${(r.projectName || '').replace(/\"/g, '\"\"')}\"`,\n        `\"${(r.vendor || '').replace(/\"/g, '\"\"')}\"`,\n        `\"${(r.status || '').replace(/\"/g, '\"\"')}\"`,\n        `\"${(r.priority || '').replace(/\"/g, '\"\"')}\"`,\n        r.budget || 0,\n        `\"${r.startDate || ''}\"`,\n        r.progress || 0,\n        `\"${(r.description || '').replace(/\"/g, '\"\"')}\"`\n      ].join(','))\n    ].join('\\n');\n\n    const blob = new Blob(['\\uFEFF' + csvData], { type: 'text/csv;charset=utf-8;' });\n    const link = document.createElement('a');\n    link.href = URL.createObjectURL(blob);\n    link.download = `web発注プラットフォーム案件一覧_${new Date().toISOString().split('T')[0]}.csv`;\n    link.click();\n  });\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let currentData = tables[0]?.records || [];\n  let sortField = '';\n  let sortDirection = 'asc';\n\n  // ステータス別の色分け\n  function getStatusBadge(status) {\n    const statusColors = {\n      '要件定義': 'background: #3b82f6; color: #fff;',\n      '設計中': 'background: #8b5cf6; color: #fff;',\n      '開発中': 'background: #f59e0b; color: #fff;',\n      'テスト中': 'background: #ef4444; color: #fff;',\n      'リリース済': 'background: #10b981; color: #fff;',\n      '保守運用': 'background: #6b7280; color: #fff;'\n    };\n    const style = statusColors[status] || 'background: #6b7280; color: #fff;';\n    return `<span class=\"px-2 py-1 text-xs rounded-full\" style=\"${style}\">${status || '未設定'}</span>`;\n  }\n\n  // 優先度別の色分け\n  function getPriorityBadge(priority) {\n    const priorityColors = {\n      '高': 'background: #ef4444; color: #fff;',\n      '中': 'background: #f59e0b; color: #fff;',\n      '低': 'background: #10b981; color: #fff;'\n    };\n    const style = priorityColors[priority] || 'background: #6b7280; color: #fff;';\n    return `<span class=\"px-2 py-1 text-xs rounded-full\" style=\"${style}\">${priority || '中'}</span>`;\n  }\n\n  // 進捗バーの生成\n  function getProgressBar(progress) {\n    const percent = Math.min(100, Math.max(0, progress || 0));\n    const color = percent >= 80 ? '#10b981' : percent >= 50 ? '#f59e0b' : '#ef4444';\n    return `\n      <div class=\"w-full bg-gray-200 rounded-full h-2\" style=\"background: rgba(255,255,255,0.1);\">\n        <div class=\"h-2 rounded-full\" style=\"width: ${percent}%; background: ${color};\"></div>\n      </div>\n      <span class=\"text-xs ml-2\" style=\"color: var(--text-muted);\">${percent}%</span>\n    `;\n  }\n\n  // テーブル再描画関数\n  function renderRows(rows) {\n    const tbody = container.querySelector('#projects-tbody');\n    tbody.innerHTML = rows.map(row => `\n      <tr class=\"hover:bg-opacity-50 cursor-pointer\" data-id=\"${row.id || ''}\" style=\"border-bottom: 1px solid rgba(255,255,255,0.08);\">\n        <td class=\"py-3 px-3\">\n          <div class=\"font-medium\" style=\"color: var(--text);\">${row.projectName || '未設定'}</div>\n          <div class=\"text-xs\" style=\"color: var(--text-muted);\">${row.description || ''}</div>\n        </td>\n        <td class=\"py-3 px-3\" style=\"color: var(--text);\">${row.clientName || '未設定'}</td>\n        <td class=\"py-3 px-3\">${getStatusBadge(row.status)}</td>\n        <td class=\"py-3 px-3\">${getPriorityBadge(row.priority)}</td>\n        <td class=\"py-3 px-3\" style=\"color: var(--text);\">¥${(row.budget || 0).toLocaleString()}</td>\n        <td class=\"py-3 px-3\" style=\"color: var(--text);\">${row.startDate || '--'}</td>\n        <td class=\"py-3 px-3\">\n          <div class=\"flex items-center\">\n            ${getProgressBar(row.progress)}\n          </div>\n        </td>\n        <td class=\"py-3 px-3\">\n          <div class=\"flex gap-1\">\n            <button class=\"action-btn secondary text-xs px-2 py-1 edit-btn\" data-id=\"${row.id || ''}\">編集</button>\n            <button class=\"action-btn secondary text-xs px-2 py-1 delete-btn\" data-id=\"${row.id || ''}\">削除</button>\n          </div>\n        </td>\n      </tr>\n    `).join('');\n\n    // 結果件数の更新\n    container.querySelector('#result-count').textContent = `${rows.length}件の案件を表示中`;\n    container.querySelector('#last-updated').textContent = new Date().toLocaleString();\n\n    updateKPIs(rows);\n  }\n\n  // KPI更新\n  function updateKPIs(rows) {\n    const total = rows.length;\n    const active = rows.filter(r => ['要件定義', '設計中', '開発中', 'テスト中'].includes(r.status)).length;\n    const totalBudget = rows.reduce((sum, r) => sum + (r.budget || 0), 0);\n    const completed = rows.filter(r => r.status === 'リリース済').length;\n    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;\n\n    container.querySelector('#kpi-total').textContent = total;\n    container.querySelector('#kpi-active').textContent = active;\n    container.querySelector('#kpi-budget').textContent = `¥${totalBudget.toLocaleString()}`;\n    container.querySelector('#kpi-completion').textContent = `${completionRate}%`;\n  }\n\n  // ソート機能\n  function sortData(field) {\n    if (sortField === field) {\n      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';\n    } else {\n      sortField = field;\n      sortDirection = 'asc';\n    }\n\n    currentData.sort((a, b) => {\n      let aVal = a[field] || '';\n      let bVal = b[field] || '';\n      \n      if (field === 'budget') {\n        aVal = parseFloat(aVal) || 0;\n        bVal = parseFloat(bVal) || 0;\n      } else if (field === 'startDate') {\n        aVal = new Date(aVal || '1970-01-01');\n        bVal = new Date(bVal || '1970-01-01');\n      }\n\n      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;\n      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;\n      return 0;\n    });\n\n    renderRows(currentData);\n  }\n\n  // 初期データの描画\n  renderRows(currentData);\n\n  // 最新データの取得\n  window.aivicApi.list(0).then(rows => {\n    if (rows) {\n      currentData = rows;\n      renderRows(currentData);\n    }\n  });\n\n  // 検索機能\n  container.querySelector('#btn-search').addEventListener('click', () => {\n    const keyword = container.querySelector('#search-keyword').value.toLowerCase();\n    const statusFilter = container.querySelector('#filter-status').value;\n    const priorityFilter = container.querySelector('#filter-priority').value;\n\n    window.aivicApi.list(0).then(rows => {\n      if (rows) {\n        let filtered = rows.filter(row => {\n          const matchKeyword = !keyword || \n            (row.projectName || '').toLowerCase().includes(keyword) ||\n            (row.clientName || '').toLowerCase().includes(keyword) ||\n            (row.description || '').toLowerCase().includes(keyword);\n          \n          const matchStatus = !statusFilter || row.status === statusFilter;\n          const matchPriority = !priorityFilter || row.priority === priorityFilter;\n\n          return matchKeyword && matchStatus && matchPriority;\n        });\n\n        currentData = filtered;\n        renderRows(filtered);\n      }\n    });\n  });\n\n  // ソートイベント\n  container.addEventListener('click', (e) => {\n    const sortBtn = e.target.closest('[data-sort]');\n    if (sortBtn) {\n      sortData(sortBtn.dataset.sort);\n    }\n  });\n\n  // 行クリックで詳細画面へ\n  container.addEventListener('click', (e) => {\n    const row = e.target.closest('tr[data-id]');\n    if (row && !e.target.closest('button')) {\n      window.showScreen('scr-3');\n    }\n  });\n\n  // 編集・削除ボタン\n  container.addEventListener('click', async (e) => {\n    const editBtn = e.target.closest('.edit-btn');\n    const deleteBtn = e.target.closest('.delete-btn');\n\n    if (editBtn) {\n      window.showScreen('scr-3');\n    }\n\n    if (deleteBtn) {\n      if (!confirm('この案件を削除しますか？')) return;\n      \n      const success = await window.aivicApi.delete(0, deleteBtn.dataset.id);\n      if (success) {\n        const updatedRows = await window.aivicApi.list(0);\n        if (updatedRows) {\n          currentData = updatedRows;\n          renderRows(updatedRows);\n        }\n      }\n    }\n  });\n\n  // CSVエクスポート\n  container.querySelector('#btn-export').addEventListener('click', async () => {\n    const rows = await window.aivicApi.list(0);\n    if (!rows) return;\n\n    const headers = ['案件名', '顧客名', 'ステータス', '優先度', '予算', '開始日', '進捗率', '説明'];\n    const csvContent = [\n      headers.join(','),\n      ...rows.map(row => [\n        `\"${(row.projectName || '').replace(/\"/g, '\"\"')}\"`,\n        `\"${(row.clientName || '').replace(/\"/g, '\"\"')}\"`,\n        `\"${(row.status || '').replace(/\"/g, '\"\"')}\"`,\n        `\"${(row.priority || '').replace(/\"/g, '\"\"')}\"`,\n        row.budget || 0,\n        `\"${(row.startDate || '').replace(/\"/g, '\"\"')}\"`,\n        row.progress || 0,\n        `\"${(row.description || '').replace(/\"/g, '\"\"')}\"`\n      ].join(','))\n    ].join('\\n');\n\n    const blob = new Blob(['\\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });\n    const link = document.createElement('a');\n    link.href = URL.createObjectURL(blob);\n    link.download = `web発注プラットフォーム案件一覧_${new Date().toISOString().split('T')[0]}.csv`;\n    link.click();\n  });\n}";
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #2e844a;
-            --primary-hover: #1e6738;
+            --primary-hover: #1e5f35;
             --primary-light: #e8f5e8;
             --bg-main: #f8f9fa;
             --bg-card: #ffffff;
             --bg-sidebar: #f4f6f9;
-            --border: #d0d7de;
-            --border-light: #e8eaed;
+            --border: #e5e5e5;
+            --border-light: #f0f0f0;
             --text: #181818;
-            --text-muted: #4a5568;
+            --text-muted: #4a4a4a;
             --text-light: #6b7280;
             --top-bar-bg: #ffffff;
-            --top-bar-border: #e1e5e9;
+            --top-bar-border: #d8dde6;
             --success: #10b981;
             --warning: #f59e0b;
-            --danger: #ef4444;
+            --error: #ef4444;
             --radius-sm: 4px;
             --radius: 6px;
             --radius-lg: 8px;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-main);
             color: var(--text);
             line-height: 1.4;
@@ -54,68 +58,82 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
 
         .app-layout {
             display: flex;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .sidebar {
-            width: 240px;
+            width: 260px;
             background: var(--bg-sidebar);
             border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
             flex-shrink: 0;
         }
 
         .sidebar-header {
-            padding: 16px 20px;
+            padding: 20px 16px 16px;
             border-bottom: 1px solid var(--border-light);
-            background: var(--top-bar-bg);
         }
 
         .logo {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--primary);
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
         }
 
-        .logo::before {
-            content: "🌐";
-            font-size: 18px;
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
         }
 
         .nav-section {
-            padding: 12px 0;
+            padding: 16px 12px 8px;
         }
 
         .nav-section-title {
-            padding: 0 20px 8px;
             font-size: 11px;
             font-weight: 600;
+            color: var(--text-light);
             text-transform: uppercase;
-            color: var(--text-muted);
             letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding: 0 8px;
         }
 
         .nav-item {
-            display: block;
-            padding: 8px 20px;
-            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            margin: 1px 0;
+            border-radius: var(--radius);
+            color: var(--text-muted);
             text-decoration: none;
-            font-size: 14px;
             font-weight: 500;
+            font-size: 13px;
+            transition: all 0.15s ease;
+            cursor: pointer;
             border: none;
             background: none;
             width: 100%;
             text-align: left;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            position: relative;
         }
 
         .nav-item:hover {
             background: rgba(46, 132, 74, 0.08);
-            color: var(--primary);
+            color: var(--text);
         }
 
         .nav-item.aivic-active {
@@ -124,20 +142,17 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
             font-weight: 600;
         }
 
-        .nav-item.aivic-active::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: var(--primary);
+        .nav-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
         }
 
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .top-bar {
@@ -148,6 +163,7 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         .page-title {
@@ -163,24 +179,24 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
         }
 
         .btn {
-            padding: 6px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--bg-card);
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
             transition: all 0.15s ease;
         }
 
         .btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+            background: var(--bg-main);
+            border-color: var(--text-light);
         }
 
         .btn-primary {
@@ -192,233 +208,87 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
         .btn-primary:hover {
             background: var(--primary-hover);
             border-color: var(--primary-hover);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-main);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .user-menu:hover {
+            border-color: var(--border);
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
         }
 
         .content-area {
             flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .kpi-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-        }
-
-        .kpi-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-
-        .kpi-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-muted);
-        }
-
-        .kpi-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text);
-            line-height: 1.2;
-        }
-
-        .kpi-change {
-            font-size: 12px;
-            font-weight: 500;
-            margin-top: 4px;
-        }
-
-        .kpi-change.positive {
-            color: var(--success);
-        }
-
-        .kpi-change.negative {
-            color: var(--danger);
-        }
-
-        .data-table {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .table-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .table-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .search-box {
-            padding: 6px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            width: 240px;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th {
-            background: var(--bg-main);
-            padding: 10px 16px;
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-light);
-            font-size: 13px;
-        }
-
-        .table tr:hover {
+            overflow: auto;
             background: var(--bg-main);
         }
 
-        .status-badge {
-            padding: 3px 8px;
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
             border-radius: 12px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
 
         .status-active {
-            background: #dcfce7;
-            color: #166534;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
         }
 
         .status-pending {
-            background: #fef3c7;
-            color: #92400e;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
         }
 
-        .status-inactive {
-            background: #f3f4f6;
-            color: #374151;
-        }
-
-        .detail-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        .detail-main {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-        }
-
-        .detail-sidebar {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            height: fit-content;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .settings-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .settings-section {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-        }
-
-        .settings-section h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
-
-        .settings-section p {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-            line-height: 1.5;
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
         }
 
         @media (max-width: 768px) {
             .sidebar {
-                width: 200px;
+                width: 240px;
             }
             
-            .content-area {
-                padding: 16px;
+            .top-bar {
+                padding: 0 16px;
             }
             
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .detail-layout {
-                grid-template-columns: 1fr;
+            .page-title {
+                font-size: 16px;
             }
         }
     </style>
@@ -427,18 +297,32 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
     <div class="app-layout">
         <nav class="sidebar">
             <div class="sidebar-header">
-                <div class="logo">Web発注プラットフォーム</div>
+                <div class="logo">
+                    <div class="logo-icon">WP</div>
+                    <span>Web発注プラットフォーム</span>
+                </div>
             </div>
             
             <div class="nav-section">
-                <div class="nav-section-title">メイン</div>
+                <div class="nav-section-title">メイン機能</div>
                 <button class="nav-item" data-aivic-nav="scr-1" onclick="showScreen('scr-1')">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                    </svg>
                     ダッシュボード
                 </button>
+                
                 <button class="nav-item" data-aivic-nav="scr-2" onclick="showScreen('scr-2')">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 3a1 1 0 000 2h10a1 1 0 100-2H5zm0 4a1 1 0 100 2h10a1 1 0 100-2H5z" clip-rule="evenodd"/>
+                    </svg>
                     データ一覧
                 </button>
+                
                 <button class="nav-item" data-aivic-nav="scr-3" onclick="showScreen('scr-3')">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                    </svg>
                     詳細・編集
                 </button>
             </div>
@@ -446,105 +330,58 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
             <div class="nav-section">
                 <div class="nav-section-title">管理</div>
                 <button class="nav-item" data-aivic-nav="scr-4" onclick="showScreen('scr-4')">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
                     設定
                 </button>
-                <a href="./login.html" class="nav-item">
-                    ログアウト
-                </a>
             </div>
         </nav>
-
+        
         <main class="main-content">
             <header class="top-bar">
                 <h1 class="page-title">Web発注プラットフォーム構築管理</h1>
                 <div class="top-bar-actions">
-                    <button class="btn btn-primary">新規作成</button>
-                    <button class="btn">エクスポート</button>
+                    <button class="btn">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                        </svg>
+                        検索
+                    </button>
+                    <button class="btn btn-primary">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+                        </svg>
+                        新規作成
+                    </button>
+                    <div class="user-menu">
+                        <div class="user-avatar">管</div>
+                        <span class="user-name">管理者</span>
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
                 </div>
             </header>
-
+            
             <div class="content-area">
                 <div data-aivic-panel="scr-1" style="display:none"></div>
-                            </div>
-                            <div class="kpi-value">1,247</div>
-                            <div class="kpi-change positive">+12.5% 前月比</div>
-                        </div>
-                        
-                        <div class="kpi-card">
-                            <div class="kpi-header">
-                                <div class="kpi-title">処理中案件</div>
-                            </div>
-                            <div class="kpi-value">89</div>
-                            <div class="kpi-change negative">+3件 昨日比</div>
-                        </div>
-                        
-                        <div class="kpi-card">
-                            <div class="kpi-header">
-                                <div class="kpi-title">完了率</div>
-                            </div>
-                            <div class="kpi-value">94.2%</div>
-                            <div class="kpi-change positive">+1.8% 前月比</div>
-                        </div>
-                        
-                        <div class="kpi-card">
-                            <div class="kpi-header">
-                                <div class="kpi-title">平均処理時間</div>
-                            </div>
-                            <div class="kpi-value">2.4日</div>
-                            <div class="kpi-change positive">-0.3日 前月比</div>
-                        </div>
-                    </div>
-
-                    <div class="data-table">
-                        <div class="table-header">
-                            <div class="table-title">最近の発注状況</div>
-                        </div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>発注ID</th>
-                                    <th>案件名</th>
-                                    <th>発注者</th>
-                                    <th>ステータス</th>
-                                    <th>作成日</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>#WO-2024-001</td>
-                                    <td>ECサイト構築</td>
-                                    <td>田中太郎</td>
-                                    <td><span class="status-badge status-active">進行中</span></td>
-                                    <td>2024-01-15</td>
-                                </tr>
-                                <tr>
-                                    <td>#WO-2024-002</td>
-                                    <td>コーポレートサイト</td>
-                                    <td>佐藤花子</td>
-                                    <td><span class="status-badge status-pending">承認待ち</span></td>
-                                    <td>2024-01-14</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <div data-aivic-panel="scr-2" style="display:block"><div class="flex flex-col h-full">
-  <!-- ヘッダー -->
-  <div class="flex items-center justify-between p-4 border-b" style="border-color: rgba(255,255,255,0.12);">
+  <!-- ヘッダー部分 -->
+  <div class="flex items-center justify-between p-3 border-b" style="border-color: rgba(255,255,255,0.12);">
     <div>
       <h1 class="text-xl font-semibold" style="color: var(--text);">Web発注プラットフォーム構築案件</h1>
-      <p class="text-sm mt-1" style="color: var(--text-muted);">プロジェクト進捗と発注データの管理</p>
+      <p class="text-sm mt-1" style="color: var(--text-muted);">プロジェクト進捗と発注状況の管理</p>
     </div>
     <div class="flex gap-2">
-      <button id="btn-export" data-testid="export-button" class="action-btn secondary">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button class="action-btn secondary" data-testid="csv-export-button" id="btn-export">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
         CSVエクスポート
       </button>
-      <button id="btn-new" data-testid="new-project-button" class="action-btn" onclick="window.showScreen('scr-3')">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button class="action-btn" data-testid="new-project-button" onclick="window.showScreen('scr-3')">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
         新規案件
@@ -552,54 +389,43 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
     </div>
   </div>
 
-  <!-- 検索・フィルターエリア -->
-  <div class="p-4 border-b" style="border-color: rgba(255,255,255,0.12); background: var(--bg-card);">
+  <!-- 検索・フィルター部分 -->
+  <div class="p-3 border-b" style="border-color: rgba(255,255,255,0.12); background: var(--bg-card);">
     <div class="grid grid-cols-4 gap-3">
       <div>
-        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted);">キーワード検索</label>
-        <input 
-          type="text" 
-          id="input-search" 
-          data-testid="search-input"
-          placeholder="案件名、発注先で検索..."
-          class="w-full px-3 py-2 text-sm rounded-md"
-          style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.18); color: var(--text);"
-        />
+        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted);">案件名・顧客名</label>
+        <input type="text" id="search-keyword" data-testid="search-keyword" placeholder="キーワード検索" 
+               class="w-full px-3 py-2 text-sm rounded-md" 
+               style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.18); color: var(--text);">
       </div>
       <div>
-        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted);">ステータス</label>
-        <select 
-          id="filter-status" 
-          data-testid="status-filter"
-          class="w-full px-3 py-2 text-sm rounded-md"
-          style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.18); color: var(--text);"
-        >
-          <option value="">全て</option>
-          <option value="企画中">企画中</option>
+        <label class="block text-xs font-medium mb-1" style="color: var(--text-muted);">進捗ステータス</label>
+        <select id="filter-status" data-testid="status-filter" 
+                class="w-full px-3 py-2 text-sm rounded-md" 
+                style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.18); color: var(--text);">
+          <option value="">全てのステータス</option>
+          <option value="要件定義">要件定義</option>
           <option value="設計中">設計中</option>
           <option value="開発中">開発中</option>
           <option value="テスト中">テスト中</option>
-          <option value="完了">完了</option>
-          <option value="保留">保留</option>
+          <option value="リリース済">リリース済</option>
+          <option value="保守運用">保守運用</option>
         </select>
       </div>
       <div>
         <label class="block text-xs font-medium mb-1" style="color: var(--text-muted);">優先度</label>
-        <select 
-          id="filter-priority" 
-          data-testid="priority-filter"
-          class="w-full px-3 py-2 text-sm rounded-md"
-          style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.18); color: var(--text);"
-        >
-          <option value="">全て</option>
+        <select id="filter-priority" data-testid="priority-filter" 
+                class="w-full px-3 py-2 text-sm rounded-md" 
+                style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.18); color: var(--text);">
+          <option value="">全ての優先度</option>
           <option value="高">高</option>
           <option value="中">中</option>
           <option value="低">低</option>
         </select>
       </div>
       <div class="flex items-end">
-        <button id="btn-search" data-testid="search-button" class="action-btn w-full">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button class="action-btn w-full" data-testid="search-button" id="btn-search">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
           検索
@@ -608,260 +434,83 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  let curren
     </div>
   </div>
 
-  <!-- KPIカード -->
-  <div class="p-4 grid grid-cols-4 gap-4">
-    <div class="card p-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium" style="color: var(--text-muted);">総案件数</p>
-          <p id="kpi-total" data-testid="kpi-total" class="text-xl font-bold mt-1" style="color: var(--text);">0</p>
-        </div>
-        <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: var(--primary);">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-          </svg>
-        </div>
+  <!-- KPI カード部分 -->
+  <div class="p-3 border-b" style="border-color: rgba(255,255,255,0.12);">
+    <div class="grid grid-cols-4 gap-3">
+      <div class="card p-3" data-testid="kpi-total-projects">
+        <div class="text-xs font-medium mb-1" style="color: var(--text-muted);">総案件数</div>
+        <div class="text-2xl font-bold" style="color: var(--primary);" id="kpi-total">0</div>
       </div>
-    </div>
-    <div class="card p-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium" style="color: var(--text-muted);">進行中</p>
-          <p id="kpi-active" data-testid="kpi-active" class="text-xl font-bold mt-1" style="color: var(--text);">0</p>
-        </div>
-        <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: #10b981;">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-        </div>
+      <div class="card p-3" data-testid="kpi-active-projects">
+        <div class="text-xs font-medium mb-1" style="color: var(--text-muted);">進行中案件</div>
+        <div class="text-2xl font-bold" style="color: #10b981;" id="kpi-active">0</div>
       </div>
-    </div>
-    <div class="card p-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium" style="color: var(--text-muted);">完了</p>
-          <p id="kpi-completed" data-testid="kpi-completed" class="text-xl font-bold mt-1" style="color: var(--text);">0</p>
-        </div>
-        <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: #3b82f6;">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-        </div>
+      <div class="card p-3" data-testid="kpi-total-budget">
+        <div class="text-xs font-medium mb-1" style="color: var(--text-muted);">総予算</div>
+        <div class="text-2xl font-bold" style="color: var(--text);" id="kpi-budget">¥0</div>
       </div>
-    </div>
-    <div class="card p-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-xs font-medium" style="color: var(--text-muted);">総予算</p>
-          <p id="kpi-budget" data-testid="kpi-budget" class="text-xl font-bold mt-1" style="color: var(--text);">¥0</p>
-        </div>
-        <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background: #f59e0b;">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-          </svg>
-        </div>
+      <div class="card p-3" data-testid="kpi-completion-rate">
+        <div class="text-xs font-medium mb-1" style="color: var(--text-muted);">完了率</div>
+        <div class="text-2xl font-bold" style="color: #f59e0b;" id="kpi-completion">0%</div>
       </div>
     </div>
   </div>
 
   <!-- メインテーブル -->
-  <div class="flex-1 p-4">
+  <div class="flex-1 overflow-auto">
     <div class="table-wrap">
-      <table data-testid="project-list" class="w-full">
+      <table data-testid="projects-list" class="w-full">
         <thead>
           <tr>
-            <th class="text-left py-3 px-4 font-medium text-sm cursor-pointer" style="color: var(--text);" data-sort="projectName">
+            <th class="text-left py-3 px-3 cursor-pointer hover:bg-opacity-50" data-sort="projectName">
               案件名
               <svg class="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
               </svg>
             </th>
-            <th class="text-left py-3 px-4 font-medium text-sm" style="color: var(--text);">発注先</th>
-            <th class="text-left py-3 px-4 font-medium text-sm cursor-pointer" style="color: var(--text);" data-sort="status">
+            <th class="text-left py-3 px-3">顧客名</th>
+            <th class="text-left py-3 px-3 cursor-pointer" data-sort="status">
               ステータス
               <svg class="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
               </svg>
             </th>
-            <th class="text-left py-3 px-4 font-medium text-sm" style="color: var(--text);">優先度</th>
-            <th class="text-left py-3 px-4 font-medium text-sm cursor-pointer" style="color: var(--text);" data-sort="budget">
+            <th class="text-left py-3 px-3">優先度</th>
+            <th class="text-left py-3 px-3 cursor-pointer" data-sort="budget">
               予算
               <svg class="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
               </svg>
             </th>
-            <th class="text-left py-3 px-4 font-medium text-sm cursor-pointer" style="color: var(--text);" data-sort="startDate">
+            <th class="text-left py-3 px-3 cursor-pointer" data-sort="startDate">
               開始日
               <svg class="w-3 h-3 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
               </svg>
             </th>
-            <th class="text-left py-3 px-4 font-medium text-sm" style="color: var(--text);">進捗</th>
-            <th class="text-center py-3 px-4 font-medium text-sm" style="color: var(--text);">操作</th>
+            <th class="text-left py-3 px-3">進捗率</th>
+            <th class="text-left py-3 px-3">操作</th>
           </tr>
         </thead>
-        <tbody id="project-tbody" data-testid="project-tbody">
+        <tbody id="projects-tbody">
           <!-- データは JavaScript で動的に挿入 -->
         </tbody>
       </table>
     </div>
   </div>
+
+  <!-- フッター統計 -->
+  <div class="p-3 border-t text-sm" style="border-color: rgba(255,255,255,0.12); background: var(--bg-card); color: var(--text-muted);">
+    <span id="result-count">0件の案件を表示中</span>
+    <span class="ml-4">最終更新: <span id="last-updated">--</span></span>
+  </div>
 </div></div>
-                            <input type="search" class="search-box" placeholder="発注ID、案件名で検索...">
-                        </div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>発注ID</th>
-                                    <th>案件名</th>
-                                    <th>発注者</th>
-                                    <th>予算</th>
-                                    <th>納期</th>
-                                    <th>ステータス</th>
-                                    <th>作成日</th>
-                                    <th>操作</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>#WO-2024-001</td>
-                                    <td>ECサイト構築プロジェクト</td>
-                                    <td>田中太郎</td>
-                                    <td>¥500,000</td>
-                                    <td>2024-03-31</td>
-                                    <td><span class="status-badge status-active">進行中</span></td>
-                                    <td>2024-01-15</td>
-                                    <td><button class="btn">編集</button></td>
-                                </tr>
-                                <tr>
-                                    <td>#WO-2024-002</td>
-                                    <td>コーポレートサイトリニューアル</td>
-                                    <td>佐藤花子</td>
-                                    <td>¥300,000</td>
-                                    <td>2024-02-28</td>
-                                    <td><span class="status-badge status-pending">承認待ち</span></td>
-                                    <td>2024-01-14</td>
-                                    <td><button class="btn">編集</button></td>
-                                </tr>
-                                <tr>
-                                    <td>#WO-2024-003</td>
-                                    <td>業務システム開発</td>
-                                    <td>鈴木一郎</td>
-                                    <td>¥1,200,000</td>
-                                    <td>2024-06-30</td>
-                                    <td><span class="status-badge status-inactive">下書き</span></td>
-                                    <td>2024-01-13</td>
-                                    <td><button class="btn">編集</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div data-aivic-panel="scr-3" style="display:none"></label>
-                                <input type="text" class="form-input" value="ECサイト構築プロジェクト">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">発注者</label>
-                                <input type="text" class="form-input" value="田中太郎">
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                                <div class="form-group">
-                                    <label class="form-label">予算</label>
-                                    <input type="text" class="form-input" value="¥500,000">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">納期</label>
-                                    <input type="date" class="form-input" value="2024-03-31">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">要件詳細</label>
-                                <textarea class="form-input" rows="6" placeholder="発注要件の詳細を入力してください..."></textarea>
-                            </div>
-                            
-                            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                                <button class="btn btn-primary">保存</button>
-                                <button class="btn">キャンセル</button>
-                            </div>
-                        </div>
-                        
-                        <div class="detail-sidebar">
-                            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">発注情報</h3>
-                            <div style="margin-bottom: 16px;">
-                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">ステータス</div>
-                                <span class="status-badge status-active">進行中</span>
-                            </div>
-                            <div style="margin-bottom: 16px;">
-                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">作成日</div>
-                                <div style="font-size: 13px;">2024-01-15 10:30</div>
-                            </div>
-                            <div style="margin-bottom: 16px;">
-                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">最終更新</div>
-                                <div style="font-size: 13px;">2024-01-20 14:22</div>
-                            </div>
-                            <div style="margin-bottom: 16px;">
-                                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 2px;">担当者</div>
-                                <div style="font-size: 13px;">山田次郎</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div data-aivic-panel="scr-4" style="display:none"></p>
-                            
-                            <div class="form-group">
-                                <label class="form-label">デフォルト承認者</label>
-                                <input type="text" class="form-input" placeholder="承認者のメールアドレス">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">自動通知設定</label>
-                                <select class="form-input">
-                                    <option>即座に通知</option>
-                                    <option>1時間後</option>
-                                    <option>翌営業日</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-section">
-                            <h3>システム設定</h3>
-                            <p>プラットフォーム全体の動作設定を調整します。</p>
-                            
-                            <div class="form-group">
-                                <label class="form-label">データ保持期間（日）</label>
-                                <input type="number" class="form-input" value="365">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">バックアップ頻度</label>
-                                <select class="form-input">
-                                    <option>毎日</option>
-                                    <option>毎週</option>
-                                    <option>毎月</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-section">
-                            <h3>ユーザー管理</h3>
-                            <p>アクセス権限とユーザーアカウントを管理します。</p>
-                            
-                            <div style="display: flex; gap: 12px;">
-                                <button class="btn btn-primary">ユーザー追加</button>
-                                <button class="btn">権限設定</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div data-aivic-panel="scr-3" style="display:none"></div>
+                <div data-aivic-panel="scr-4" style="display:none"></div>
             </div>
         </main>
     </div>
-
+    
     <script>
 (function() {
   var TABLE_DEFS = window.AIVIC_TABLES || [];
