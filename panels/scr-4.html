@@ -1,12 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web発注プラットフォーム構築管理</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Web発注プラットフォーム管理システム</title>
     <script>
 window.AIVIC_API_URL = "https://jqykrkgdvngp7qvmavufg5tohq0xwdzb.lambda-url.us-east-1.on.aws/";
 window.AIVIC_APP_ID = "session-1780284530342";
@@ -20,26 +17,22 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
     <style>
         :root {
             --primary: #2e844a;
-            --primary-hover: #1e5f35;
+            --primary-hover: #1d5f36;
             --primary-light: #e8f5e8;
             --bg-main: #f8f9fa;
             --bg-card: #ffffff;
             --bg-sidebar: #f4f6f9;
-            --border: #e5e5e5;
-            --border-light: #f0f0f0;
+            --border: #d0d7de;
+            --border-light: #e1e8ed;
             --text: #181818;
-            --text-muted: #4a4a4a;
-            --text-light: #6b7280;
+            --text-muted: #57606a;
+            --text-light: #6c757d;
             --top-bar-bg: #ffffff;
-            --top-bar-border: #d8dde6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --radius-sm: 4px;
-            --radius: 6px;
-            --radius-lg: 8px;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --top-bar-border: #d1d9e0;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
         }
 
         * {
@@ -49,30 +42,28 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg-main);
             color: var(--text);
             line-height: 1.4;
             font-size: 14px;
         }
 
-        .app-layout {
+        .app-container {
             display: flex;
             height: 100vh;
-            overflow: hidden;
         }
 
         .sidebar {
-            width: 260px;
+            width: 240px;
             background: var(--bg-sidebar);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
         }
 
         .sidebar-header {
-            padding: 20px 16px 16px;
+            padding: 16px;
             border-bottom: 1px solid var(--border-light);
         }
 
@@ -80,7 +71,7 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
             display: flex;
             align-items: center;
             gap: 8px;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 16px;
             color: var(--text);
         }
@@ -88,64 +79,53 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
         .logo-icon {
             width: 28px;
             height: 28px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            border-radius: var(--radius);
+            background: var(--primary);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 12px;
         }
 
-        .nav-section {
-            padding: 16px 12px 8px;
-        }
-
-        .nav-section-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            padding: 0 8px;
+        .nav-menu {
+            flex: 1;
+            padding: 12px 0;
         }
 
         .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            margin: 1px 0;
-            border-radius: var(--radius);
-            color: var(--text-muted);
+            display: block;
+            padding: 8px 16px;
+            color: var(--text);
             text-decoration: none;
-            font-weight: 500;
-            font-size: 13px;
+            border-radius: 0;
+            margin: 0 8px;
+            border-radius: 4px;
             transition: all 0.15s ease;
+            font-size: 14px;
             cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
         }
 
         .nav-item:hover {
             background: rgba(46, 132, 74, 0.08);
-            color: var(--text);
+            color: var(--primary);
         }
 
         .nav-item.aivic-active {
             background: var(--primary-light);
             color: var(--primary);
-            font-weight: 600;
+            font-weight: 500;
         }
 
-        .nav-icon {
-            width: 16px;
-            height: 16px;
-            opacity: 0.8;
+        .nav-section {
+            margin: 16px 0 8px 0;
+            padding: 0 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
         }
 
         .main-content {
@@ -158,12 +138,11 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
         .top-bar {
             background: var(--top-bar-bg);
             border-bottom: 1px solid var(--top-bar-border);
-            padding: 0 24px;
-            height: 56px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-shrink: 0;
+            min-height: 56px;
         }
 
         .page-title {
@@ -179,24 +158,23 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
         }
 
         .btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
-            border-radius: var(--radius);
-            font-size: 13px;
-            font-weight: 500;
-            text-decoration: none;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text);
-            cursor: pointer;
             transition: all 0.15s ease;
         }
 
         .btn:hover {
-            background: var(--bg-main);
-            border-color: var(--text-light);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .btn-primary {
@@ -208,54 +186,172 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
         .btn-primary:hover {
             background: var(--primary-hover);
             border-color: var(--primary-hover);
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: var(--radius-lg);
-            background: var(--bg-main);
-            border: 1px solid var(--border-light);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .user-menu:hover {
-            border-color: var(--border);
-        }
-
-        .user-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: white;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .user-name {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
         }
 
         .content-area {
             flex: 1;
             overflow: auto;
-            background: var(--bg-main);
+            padding: 20px;
         }
 
-        .status-indicator {
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .kpi-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .kpi-change.positive {
+            color: var(--success);
+        }
+
+        .kpi-change.negative {
+            color: var(--danger);
+        }
+
+        .data-table {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .search-box {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 13px;
+            width: 240px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .detail-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .detail-main {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 24px;
+        }
+
+        .detail-sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .settings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .settings-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .settings-description {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 500;
@@ -264,526 +360,602 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {}";
         }
 
         .status-active {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(40, 167, 69, 0.1);
             color: var(--success);
         }
 
         .status-pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
         }
 
-        .status-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
+        .status-inactive {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--text-muted);
         }
 
         @media (max-width: 768px) {
             .sidebar {
-                width: 240px;
+                width: 200px;
             }
             
-            .top-bar {
-                padding: 0 16px;
+            .dashboard-grid {
+                grid-template-columns: 1fr;
             }
             
-            .page-title {
-                font-size: 16px;
+            .detail-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-area {
+                padding: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="app-layout">
+    <div class="app-container">
         <nav class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <div class="logo-icon">WP</div>
-                    <span>Web発注プラットフォーム</span>
+                    <div class="logo-icon">WO</div>
+                    <span>Web発注システム</span>
                 </div>
             </div>
             
-            <div class="nav-section">
-                <div class="nav-section-title">メイン機能</div>
-                <button class="nav-item" data-aivic-nav="scr-1" onclick="showScreen('scr-1')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                    </svg>
-                    ダッシュボード
-                </button>
+            <div class="nav-menu">
+                <div class="nav-section">メイン</div>
+                <a class="nav-item" data-aivic-nav="scr-1" onclick="showScreen('scr-1')">
+                    📊 ダッシュボード
+                </a>
+                <a class="nav-item" data-aivic-nav="scr-2" onclick="showScreen('scr-2')">
+                    📋 発注データ一覧
+                </a>
+                <a class="nav-item" data-aivic-nav="scr-3" onclick="showScreen('scr-3')">
+                    📝 詳細・編集
+                </a>
                 
-                <button class="nav-item" data-aivic-nav="scr-2" onclick="showScreen('scr-2')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 3a1 1 0 000 2h10a1 1 0 100-2H5zm0 4a1 1 0 100 2h10a1 1 0 100-2H5z" clip-rule="evenodd"/>
-                    </svg>
-                    データ一覧
-                </button>
+                <div class="nav-section">管理</div>
+                <a class="nav-item" data-aivic-nav="scr-4" onclick="showScreen('scr-4')">
+                    ⚙️ システム設定
+                </a>
                 
-                <button class="nav-item" data-aivic-nav="scr-3" onclick="showScreen('scr-3')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                    </svg>
-                    詳細・編集
-                </button>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">管理</div>
-                <button class="nav-item" data-aivic-nav="scr-4" onclick="showScreen('scr-4')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
-                    </svg>
-                    設定
-                </button>
+                <div class="nav-section">アカウント</div>
+                <a href="./login.html" class="nav-item">
+                    🚪 ログアウト
+                </a>
             </div>
         </nav>
-        
+
         <main class="main-content">
             <header class="top-bar">
-                <h1 class="page-title">Web発注プラットフォーム構築管理</h1>
+                <h1 class="page-title" id="current-page-title">ダッシュボード</h1>
                 <div class="top-bar-actions">
-                    <button class="btn">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-                        </svg>
-                        検索
-                    </button>
-                    <button class="btn btn-primary">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
-                        </svg>
-                        新規作成
-                    </button>
-                    <div class="user-menu">
-                        <div class="user-avatar">管</div>
-                        <span class="user-name">管理者</span>
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
+                    <input type="search" class="search-box" placeholder="検索...">
+                    <button class="btn btn-primary">+ 新規発注</button>
                 </div>
             </header>
-            
+
             <div class="content-area">
-                <div data-aivic-panel="scr-1" style="display:none"></div>
-                <div data-aivic-panel="scr-2" style="display:none"></div>
-                <div data-aivic-panel="scr-3" style="display:none"></div>
+                <div data-aivic-panel="scr-1" style="display:none"></span>
+                            </div>
+                            <div class="kpi-value">1,247</div>
+                            <div class="kpi-change positive">+12% 前月比</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">処理中の発注</span>
+                            </div>
+                            <div class="kpi-value">89</div>
+                            <div class="kpi-change">進行中</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">今月の発注額</span>
+                            </div>
+                            <div class="kpi-value">¥2.4M</div>
+                            <div class="kpi-change positive">+8% 前月比</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">承認待ち</span>
+                            </div>
+                            <div class="kpi-value">23</div>
+                            <div class="kpi-change">要対応</div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-table">
+                        <div class="table-header">
+                            <h3 class="table-title">最近の発注活動</h3>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p style="color: var(--text-muted); font-size: 13px;">最新の発注データがここに表示されます</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-aivic-panel="scr-2" style="display:none"></button>
+                                <button class="btn">エクスポート</button>
+                            </div>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p style="color: var(--text-muted); font-size: 13px;">発注データの検索・一覧表示機能がここに実装されます</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-aivic-panel="scr-3" style="display:none"></label>
+                                <input type="text" class="form-input" placeholder="WO-2024-001">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">発注先</label>
+                                <input type="text" class="form-input" placeholder="業者名を入力">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">発注内容</label>
+                                <textarea class="form-input" rows="4" placeholder="発注内容の詳細"></textarea>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label">発注金額</label>
+                                    <input type="number" class="form-input" placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">納期</label>
+                                    <input type="date" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                                <button class="btn btn-primary">保存</button>
+                                <button class="btn">キャンセル</button>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-sidebar">
+                            <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 600;">発注ステータス</h3>
+                            <div style="margin-bottom: 16px;">
+                                <span class="status-badge status-pending">承認待ち</span>
+                            </div>
+                            
+                            <h4 style="margin: 20px 0 8px 0; font-size: 14px; font-weight: 600;">履歴</h4>
+                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+                                <p>2024/01/15 - 発注作成</p>
+                                <p>2024/01/16 - 承認申請</p>
+                            </div>
+                            
+                            <h4 style="margin: 20px 0 8px 0; font-size: 14px; font-weight: 600;">添付ファイル</h4>
+                            <button class="btn" style="width: 100%; margin-bottom: 8px;">+ ファイル追加</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div data-aivic-panel="scr-4" style="display:block"><div class="flex h-full">
   <!-- 左サイドバー - 設定カテゴリ -->
   <div class="w-64 bg-[var(--bg-sidebar)] border-r border-[rgba(255,255,255,0.12)] flex-shrink-0">
     <div class="p-4">
       <h2 class="text-lg font-semibold text-[var(--text)] mb-4">プラットフォーム設定</h2>
       <nav class="space-y-1">
-        <button data-testid="permissions-tab" class="settings-tab w-full text-left px-3 py-2 rounded text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.08)] active" data-tab="permissions">
-          権限設定
+        <button class="setting-nav-btn w-full text-left px-3 py-2 rounded text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.08)] transition-colors active" data-category="permissions" data-testid="permissions-nav">
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"></path>
+            </svg>
+            権限設定
+          </div>
         </button>
-        <button data-testid="notifications-tab" class="settings-tab w-full text-left px-3 py-2 rounded text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.08)]" data-tab="notifications">
-          通知設定
+        <button class="setting-nav-btn w-full text-left px-3 py-2 rounded text-sm text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)] transition-colors" data-category="notifications" data-testid="notifications-nav">
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+            </svg>
+            通知設定
+          </div>
         </button>
-        <button data-testid="master-tab" class="settings-tab w-full text-left px-3 py-2 rounded text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.08)]" data-tab="master">
-          マスタ設定
+        <button class="setting-nav-btn w-full text-left px-3 py-2 rounded text-sm text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)] transition-colors" data-category="master" data-testid="master-nav">
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+            </svg>
+            マスタ設定
+          </div>
         </button>
-        <button data-testid="audit-tab" class="settings-tab w-full text-left px-3 py-2 rounded text-sm text-[var(--text)] hover:bg-[rgba(255,255,255,0.08)]" data-tab="audit">
-          監査ログ
+        <button class="setting-nav-btn w-full text-left px-3 py-2 rounded text-sm text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.08)] transition-colors" data-category="audit" data-testid="audit-nav">
+          <div class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+            監査ログ
+          </div>
         </button>
       </nav>
     </div>
   </div>
 
-  <!-- メインコンテンツエリア -->
-  <div class="flex-1 overflow-auto">
-    <!-- 権限設定タブ -->
-    <div id="permissions-panel" class="settings-panel p-6">
+  <!-- 右メインコンテンツ -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- 権限設定パネル -->
+    <div id="permissions-panel" class="setting-panel flex-1 p-6">
       <div class="mb-6">
-        <h1 class="text-xl font-semibold text-[var(--text)] mb-2">権限設定</h1>
+        <h3 class="text-xl font-semibold text-[var(--text)] mb-2">権限設定</h3>
         <p class="text-sm text-[var(--text-muted)]">ユーザーロールと機能アクセス権限を管理します</p>
       </div>
 
       <div class="grid grid-cols-2 gap-6">
         <!-- ロール管理 -->
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">ロール管理</h3>
+        <div class="card p-4">
+          <h4 class="font-medium text-[var(--text)] mb-4">ロール管理</h4>
           <div class="space-y-3">
             <div>
               <label class="block text-xs text-[var(--text-muted)] mb-1">ロール名</label>
-              <input data-testid="role-name-input" type="text" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]" placeholder="新しいロール名">
+              <input type="text" class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" placeholder="新しいロール名" data-testid="role-name-input">
             </div>
             <div>
-              <label class="block text-xs text-[var(--text-muted)] mb-1">説明</label>
-              <textarea data-testid="role-description" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)] h-20" placeholder="ロールの説明"></textarea>
-            </div>
-            <button data-testid="add-role-button" class="action-btn w-full">ロール追加</button>
-          </div>
-        </div>
-
-        <!-- 権限マトリックス -->
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">権限マトリックス</h3>
-          <div class="space-y-3">
-            <div class="grid grid-cols-3 gap-2 text-xs text-[var(--text-muted)]">
-              <div>機能</div>
-              <div>読取</div>
-              <div>編集</div>
-            </div>
-            <div class="grid grid-cols-3 gap-2 items-center py-2 border-b border-[rgba(255,255,255,0.08)]">
-              <span class="text-sm text-[var(--text)]">発注管理</span>
-              <input type="checkbox" class="accent-[var(--primary)]" checked>
-              <input type="checkbox" class="accent-[var(--primary)]" checked>
-            </div>
-            <div class="grid grid-cols-3 gap-2 items-center py-2 border-b border-[rgba(255,255,255,0.08)]">
-              <span class="text-sm text-[var(--text)]">業者管理</span>
-              <input type="checkbox" class="accent-[var(--primary)]" checked>
-              <input type="checkbox" class="accent-[var(--primary)]">
-            </div>
-            <div class="grid grid-cols-3 gap-2 items-center py-2 border-b border-[rgba(255,255,255,0.08)]">
-              <span class="text-sm text-[var(--text)]">システム設定</span>
-              <input type="checkbox" class="accent-[var(--primary)]">
-              <input type="checkbox" class="accent-[var(--primary)]">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ユーザーロール割り当て -->
-      <div class="mt-6">
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">ユーザーロール割り当て</h3>
-          <div class="table-wrap">
-            <table data-testid="user-roles-table">
-              <thead>
-                <tr>
-                  <th>ユーザー名</th>
-                  <th>メールアドレス</th>
-                  <th>現在のロール</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody id="user-roles-tbody">
-                <tr>
-                  <td>田中太郎</td>
-                  <td>tanaka@example.com</td>
-                  <td>管理者</td>
-                  <td>
-                    <select data-testid="role-select" class="input px-2 py-1 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-xs text-[var(--text)]">
-                      <option value="">ロール選択</option>
-                      <option value="admin">管理者</option>
-                      <option value="manager">マネージャー</option>
-                      <option value="operator">オペレーター</option>
-                      <option value="viewer">閲覧者</option>
-                    </select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 通知設定タブ -->
-    <div id="notifications-panel" class="settings-panel p-6 hidden">
-      <div class="mb-6">
-        <h1 class="text-xl font-semibold text-[var(--text)] mb-2">通知設定</h1>
-        <p class="text-sm text-[var(--text-muted)]">システム通知とアラートの設定を管理します</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-6">
-        <!-- メール通知設定 -->
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">メール通知設定</h3>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between py-2">
-              <div>
-                <div class="text-sm text-[var(--text)]">発注完了通知</div>
-                <div class="text-xs text-[var(--text-muted)]">発注が完了した際にメール通知</div>
-              </div>
-              <input type="checkbox" class="accent-[var(--primary)]" checked>
-            </div>
-            <div class="flex items-center justify-between py-2">
-              <div>
-                <div class="text-sm text-[var(--text)]">承認待ち通知</div>
-                <div class="text-xs text-[var(--text-muted)]">承認が必要な案件の通知</div>
-              </div>
-              <input type="checkbox" class="accent-[var(--primary)]" checked>
-            </div>
-            <div class="flex items-center justify-between py-2">
-              <div>
-                <div class="text-sm text-[var(--text)]">期限アラート</div>
-                <div class="text-xs text-[var(--text-muted)]">納期が近づいた際のアラート</div>
-              </div>
-              <input type="checkbox" class="accent-[var(--primary)]">
-            </div>
-          </div>
-        </div>
-
-        <!-- Slack連携設定 -->
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">Slack連携設定</h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-xs text-[var(--text-muted)] mb-1">Webhook URL</label>
-              <input data-testid="slack-webhook" type="url" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]" placeholder="https://hooks.slack.com/...">
-            </div>
-            <div>
-              <label class="block text-xs text-[var(--text-muted)] mb-1">通知チャンネル</label>
-              <input data-testid="slack-channel" type="text" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]" placeholder="#general">
-            </div>
-            <button data-testid="test-slack-button" class="action-btn secondary w-full">接続テスト</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 通知履歴 -->
-      <div class="mt-6">
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">通知履歴</h3>
-          <div class="table-wrap">
-            <table data-testid="notification-history-table">
-              <thead>
-                <tr>
-                  <th>日時</th>
-                  <th>種別</th>
-                  <th>宛先</th>
-                  <th>内容</th>
-                  <th>ステータス</th>
-                </tr>
-              </thead>
-              <tbody id="notification-history-tbody">
-                <tr>
-                  <td>2024-01-15 14:30</td>
-                  <td>メール</td>
-                  <td>tanaka@example.com</td>
-                  <td>発注承認依頼</td>
-                  <td><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">送信済み</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- マスタ設定タブ -->
-    <div id="master-panel" class="settings-panel p-6 hidden">
-      <div class="mb-6">
-        <h1 class="text-xl font-semibold text-[var(--text)] mb-2">マスタ設定</h1>
-        <p class="text-sm text-[var(--text-muted)]">システムで使用するマスタデータを管理します</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-6">
-        <!-- カテゴリマスタ -->
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">発注カテゴリマスタ</h3>
-          <div class="space-y-3 mb-4">
-            <div>
-              <label class="block text-xs text-[var(--text-muted)] mb-1">カテゴリ名</label>
-              <input data-testid="category-name" type="text" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]" placeholder="新しいカテゴリ">
-            </div>
-            <div>
-              <label class="block text-xs text-[var(--text-muted)] mb-1">表示順</label>
-              <input data-testid="category-order" type="number" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]" placeholder="1">
-            </div>
-            <button data-testid="add-category-button" class="action-btn w-full">カテゴリ追加</button>
-          </div>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between p-2 bg-[rgba(255,255,255,0.05)] rounded">
-              <span class="text-sm text-[var(--text)]">システム開発</span>
-              <button class="text-xs text-red-400 hover:text-red-300">削除</button>
-            </div>
-            <div class="flex items-center justify-between p-2 bg-[rgba(255,255,255,0.05)] rounded">
-              <span class="text-sm text-[var(--text)]">インフラ構築</span>
-              <button class="text-xs text-red-400 hover:text-red-300">削除</button>
-            </div>
-            <div class="flex items-center justify-between p-2 bg-[rgba(255,255,255,0.05)] rounded">
-              <span class="text-sm text-[var(--text)]">デザイン制作</span>
-              <button class="text-xs text-red-400 hover:text-red-300">削除</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ステータスマスタ -->
-        <div class="card">
-          <h3 class="text-base font-medium text-[var(--text)] mb-4">ステータスマスタ</h3>
-          <div class="space-y-3 mb-4">
-            <div>
-              <label class="block text-xs text-[var(--text-muted)] mb-1">ステータス名</label>
-              <input data-testid="status-name" type="text" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]" placeholder="新しいステータス">
-            </div>
-            <div>
-              <label class="block text-xs text-[var(--text-muted)] mb-1">表示色</label>
-              <select data-testid="status-color" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]">
-                <option value="">色を選択</option>
-                <option value="blue">青色</option>
-                <option value="green">緑色</option>
-                <option value="yellow">黄色</option>
-                <option value="red">赤色</option>
-                <option value="gray">灰色</option>
+              <label class="block text-xs text-[var(--text-muted)] mb-1">権限レベル</label>
+              <select class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" data-testid="permission-level-select">
+                <option value="">選択してください</option>
+                <option value="admin">管理者</option>
+                <option value="manager">マネージャー</option>
+                <option value="operator">オペレーター</option>
+                <option value="viewer">閲覧者</option>
               </select>
             </div>
-            <button data-testid="add-status-button" class="action-btn w-full">ステータス追加</button>
+            <button class="action-btn w-full" data-testid="add-role-button">ロール追加</button>
           </div>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between p-2 bg-[rgba(255,255,255,0.05)] rounded">
-              <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span class="text-sm text-[var(--text)]">受付中</span>
-              </div>
-              <button class="text-xs text-red-400 hover:text-red-300">削除</button>
+        </div>
+
+        <!-- 機能権限 -->
+        <div class="card p-4">
+          <h4 class="font-medium text-[var(--text)] mb-4">機能権限</h4>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-[var(--text)]">発注管理</span>
+              <input type="checkbox" class="accent-[var(--primary)]" data-testid="order-permission">
             </div>
-            <div class="flex items-center justify-between p-2 bg-[rgba(255,255,255,0.05)] rounded">
-              <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span class="text-sm text-[var(--text)]">進行中</span>
-              </div>
-              <button class="text-xs text-red-400 hover:text-red-300">削除</button>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-[var(--text)]">業者管理</span>
+              <input type="checkbox" class="accent-[var(--primary)]" data-testid="vendor-permission">
             </div>
-            <div class="flex items-center justify-between p-2 bg-[rgba(255,255,255,0.05)] rounded">
-              <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span class="text-sm text-[var(--text)]">完了</span>
-              </div>
-              <button class="text-xs text-red-400 hover:text-red-300">削除</button>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-[var(--text)]">レポート閲覧</span>
+              <input type="checkbox" class="accent-[var(--primary)]" data-testid="report-permission">
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-[var(--text)]">システム設定</span>
+              <input type="checkbox" class="accent-[var(--primary)]" data-testid="system-permission">
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 業者マスタ -->
+      <!-- ロール一覧 -->
       <div class="mt-6">
-        <div class="card">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-medium text-[var(--text)]">業者マスタ</h3>
-            <button data-testid="add-vendor-button" class="action-btn">業者追加</button>
-          </div>
-          <div class="table-wrap">
-            <table data-testid="vendor-master-table">
-              <thead>
-                <tr>
-                  <th>業者名</th>
-                  <th>連絡先</th>
-                  <th>専門分野</th>
-                  <th>評価</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody id="vendor-master-tbody">
-                <tr>
-                  <td>株式会社テックソリューション</td>
-                  <td>tech@example.com</td>
-                  <td>システム開発</td>
-                  <td>★★★★☆</td>
-                  <td>
-                    <button class="action-btn secondary edit-btn" data-id="1">編集</button>
-                    <button class="action-btn secondary delete-btn" data-id="1">削除</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 監査ログタブ -->
-    <div id="audit-panel" class="settings-panel p-6 hidden">
-      <div class="mb-6">
-        <h1 class="text-xl font-semibold text-[var(--text)] mb-2">監査ログ</h1>
-        <p class="text-sm text-[var(--text-muted)]">システムの操作履歴と監査ログを確認できます</p>
-      </div>
-
-      <!-- 検索フィルタ -->
-      <div class="card mb-6">
-        <h3 class="text-base font-medium text-[var(--text)] mb-4">ログ検索</h3>
-        <div class="grid grid-cols-4 gap-4">
-          <div>
-            <label class="block text-xs text-[var(--text-muted)] mb-1">期間（開始）</label>
-            <input data-testid="audit-date-from" type="date" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]">
-          </div>
-          <div>
-            <label class="block text-xs text-[var(--text-muted)] mb-1">期間（終了）</label>
-            <input data-testid="audit-date-to" type="date" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]">
-          </div>
-          <div>
-            <label class="block text-xs text-[var(--text-muted)] mb-1">操作種別</label>
-            <select data-testid="audit-action-filter" class="input w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-sm text-[var(--text)]">
-              <option value="">すべて</option>
-              <option value="login">ログイン</option>
-              <option value="create">作成</option>
-              <option value="update">更新</option>
-              <option value="delete">削除</option>
-              <option value="export">エクスポート</option>
-            </select>
-          </div>
-          <div class="flex items-end">
-            <button data-testid="audit-search-button" class="action-btn w-full">検索</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 監査ログ一覧 -->
-      <div class="card">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-medium text-[var(--text)]">操作履歴</h3>
-          <button data-testid="export-audit-button" class="action-btn secondary">CSVエクスポート</button>
-        </div>
+        <h4 class="font-medium text-[var(--text)] mb-3">既存ロール</h4>
         <div class="table-wrap">
-          <table data-testid="audit-log-table">
+          <table data-testid="roles-table">
             <thead>
               <tr>
-                <th>日時</th>
-                <th>ユーザー</th>
+                <th>ロール名</th>
+                <th>権限レベル</th>
+                <th>ユーザー数</th>
+                <th>作成日</th>
                 <th>操作</th>
-                <th>対象</th>
-                <th>IPアドレス</th>
-                <th>詳細</th>
               </tr>
             </thead>
-            <tbody id="audit-log-tbody">
-              <tr>
-                <td>2024-01-15 14:30:25</td>
-                <td>田中太郎</td>
-                <td><span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">ログイン</span></td>
-                <td>システム</td>
-                <td>192.168.1.100</td>
-                <td>正常ログイン</td>
-              </tr>
-              <tr>
-                <td>2024-01-15 14:25:10</td>
-                <td>佐藤花子</td>
-                <td><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">作成</span></td>
-                <td>発注データ</td>
-                <td>192.168.1.101</td>
-                <td>発注ID: ORD-2024-001</td>
-              </tr>
-              <tr>
-                <td>2024-01-15 14:20:45</td>
-                <td>山田次郎</td>
-                <td><span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs">更新</span></td>
-                <td>業者マスタ</td>
-                <td>192.168.1.102</td>
-                <td>業者ID: VEN-001の連絡先変更</td>
+            <tbody id="roles-tbody">
+              <tr data-id="1">
+                <td>システム管理者</td>
+                <td><span class="px-2 py-1 bg-[var(--primary)] text-white text-xs rounded">管理者</span></td>
+                <td>3</td>
+                <td>2024-01-15</td>
+                <td>
+                  <button class="action-btn secondary edit-btn" data-id="1">編集</button>
+                  <button class="action-btn secondary delete-btn" data-id="1">削除</button>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ナビゲーションボタン -->
-<div class="fixed bottom-4 right-4 flex gap-2">
-  <button data-testid="dashboard-nav" class="action-btn secondary" onclick="window.showScreen('scr-1')">
-    ダッシュボード
-  </button>
-  <button data-testid="data-list-nav" class="action-btn secondary" onclick="window.showScreen('scr-2')">
-    データ一覧
-  </button>
-</div></div>
+    <!-- 通知設定パネル -->
+    <div id="notifications-panel" class="setting-panel flex-1 p-6" style="display:none">
+      <div class="mb-6">
+        <h3 class="text-xl font-semibold text-[var(--text)] mb-2">通知設定</h3>
+        <p class="text-sm text-[var(--text-muted)]">システム通知とアラートの設定を管理します</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6">
+        <!-- メール通知 -->
+        <div class="card p-4">
+          <h4 class="font-medium text-[var(--text)] mb-4">メール通知</h4>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-[var(--text)]">新規発注通知</div>
+                <div class="text-xs text-[var(--text-muted)]">新しい発注が作成された時</div>
+              </div>
+              <input type="checkbox" class="accent-[var(--primary)]" checked data-testid="new-order-notification">
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-[var(--text)]">承認待ち通知</div>
+                <div class="text-xs text-[var(--text-muted)]">承認が必要な案件がある時</div>
+              </div>
+              <input type="checkbox" class="accent-[var(--primary)]" checked data-testid="approval-notification">
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-[var(--text)]">期限アラート</div>
+                <div class="text-xs text-[var(--text-muted)]">納期が近づいた時</div>
+              </div>
+              <input type="checkbox" class="accent-[var(--primary)]" data-testid="deadline-notification">
+            </div>
+          </div>
+        </div>
+
+        <!-- 通知頻度 -->
+        <div class="card p-4">
+          <h4 class="font-medium text-[var(--text)] mb-4">通知頻度</h4>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-[var(--text-muted)] mb-1">日次レポート送信時刻</label>
+              <input type="time" class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" value="09:00" data-testid="daily-report-time">
+            </div>
+            <div>
+              <label class="block text-xs text-[var(--text-muted)] mb-1">週次サマリー送信日</label>
+              <select class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" data-testid="weekly-summary-day">
+                <option value="">選択してください</option>
+                <option value="monday">月曜日</option>
+                <option value="friday">金曜日</option>
+                <option value="sunday">日曜日</option>
+              </select>
+            </div>
+            <button class="action-btn w-full" data-testid="save-notification-settings">通知設定を保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- マスタ設定パネル -->
+    <div id="master-panel" class="setting-panel flex-1 p-6" style="display:none">
+      <div class="mb-6">
+        <h3 class="text-xl font-semibold text-[var(--text)] mb-2">マスタ設定</h3>
+        <p class="text-sm text-[var(--text-muted)]">システムで使用するマスタデータを管理します</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4">
+        <!-- 業者分類 -->
+        <div class="card p-4">
+          <h4 class="font-medium text-[var(--text)] mb-3">業者分類</h4>
+          <div class="space-y-2">
+            <div>
+              <input type="text" class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" placeholder="新しい分類名" data-testid="vendor-category-input">
+            </div>
+            <button class="action-btn secondary w-full text-sm" data-testid="add-vendor-category">追加</button>
+            <div class="mt-3 space-y-1">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-[var(--text)]">建設業</span>
+                <button class="text-[var(--text-muted)] hover:text-red-400">×</button>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-[var(--text)]">製造業</span>
+                <button class="text-[var(--text-muted)] hover:text-red-400">×</button>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-[var(--text)]">IT・通信</span>
+                <button class="text-[var(--text-muted)] hover:text-red-400">×</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 発注カテゴリ -->
+        <div class="card p-4">
+          <h4 class="font-medium text-[var(--text)] mb-3">発注カテゴリ</h4>
+          <div class="space-y-2">
+            <div>
+              <input type="text" class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" placeholder="新しいカテゴリ名" data-testid="order-category-input">
+            </div>
+            <button class="action-btn secondary w-full text-sm" data-testid="add-order-category">追加</button>
+            <div class="mt-3 space-y-1">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-[var(--text)]">資材調達</span>
+                <button class="text-[var(--text-muted)] hover:text-red-400">×</button>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-[var(--text)]">工事請負</span>
+                <button class="text-[var(--text-muted)] hover:text-red-400">×</button>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-[var(--text)]">保守・点検</span>
+                <button class="text-[var(--text-muted)] hover:text-red-400">×</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 承認フロー -->
+        <div class="card p-4">
+          <h4 class="font-medium text-[var(--text)] mb-3">承認フロー</h4>
+          <div class="space-y-2">
+            <div>
+              <select class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" data-testid="approval-flow-select">
+                <option value="">選択してください</option>
+                <option value="single">単一承認</option>
+                <option value="double">二段階承認</option>
+                <option value="parallel">並列承認</option>
+              </select>
+            </div>
+            <div>
+              <input type="number" class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" placeholder="金額閾値" data-testid="approval-threshold">
+            </div>
+            <button class="action-btn secondary w-full text-sm" data-testid="add-approval-flow">フロー追加</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 監査ログパネル -->
+    <div id="audit-panel" class="setting-panel flex-1 p-6" style="display:none">
+      <div class="mb-6">
+        <h3 class="text-xl font-semibold text-[var(--text)] mb-2">監査ログ</h3>
+        <p class="text-sm text-[var(--text-muted)]">システムの操作履歴とセキュリティログを確認します</p>
+      </div>
+
+      <!-- フィルタ -->
+      <div class="card p-4 mb-4">
+        <div class="grid grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs text-[var(--text-muted)] mb-1">期間（開始）</label>
+            <input type="date" class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" data-testid="audit-start-date">
+          </div>
+          <div>
+            <label class="block text-xs text-[var(--text-muted)] mb-1">期間（終了）</label>
+            <input type="date" class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" data-testid="audit-end-date">
+          </div>
+          <div>
+            <label class="block text-xs text-[var(--text-muted)] mb-1">操作種別</label>
+            <select class="w-full px-3 py-2 bg-[rgba(0,0,0,0.25)] border border-[rgba(255,255,255,0.18)] rounded text-[var(--text)] text-sm" data-testid="audit-action-filter">
+              <option value="">すべて</option>
+              <option value="login">ログイン</option>
+              <option value="create">作成</option>
+              <option value="update">更新</option>
+              <option value="delete">削除</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button class="action-btn w-full" data-testid="search-audit-logs">検索</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ログ一覧 -->
+      <div class="table-wrap">
+        <table data-testid="audit-logs-table">
+          <thead>
+            <tr>
+              <th>日時</th>
+              <th>ユーザー</th>
+              <th>操作</th>
+              <th>対象</th>
+              <th>IPアドレス</th>
+              <th>結果</th>
+            </tr>
+          </thead>
+          <tbody id="audit-logs-tbody">
+            <tr>
+              <td>2024-01-20 14:30:25</td>
+              <td>田中太郎</td>
+              <td><span class="px-2 py-1 bg-blue-500 text-white text-xs rounded">作成</span></td>
+              <td>発注書 #ORD-2024-001</td>
+              <td>192.168.1.100</td>
+              <td><span class="px-2 py-1 bg-green-500 text-white text-xs rounded">成功</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-20 14:25:12</td>
+              <td>佐藤花子</td>
+              <td><span class="px-2 py-1 bg-orange-500 text-white text-xs rounded">更新</span></td>
+              <td>業者情報 #VEN-001</td>
+              <td>192.168.1.101</td>
+              <td><span class="px-2 py-1 bg-green-500 text-white text-xs rounded">成功</span></td>
+            </tr>
+            <tr>
+              <td>2024-01-20 14:20:45</td>
+              <td>山田次郎</td>
+              <td><span class="px-2 py-1 bg-gray-500 text-white text-xs rounded">ログイン</span></td>
+              <td>システム</td>
+              <td>192.168.1.102</td>
+              <td><span class="px-2 py-1 bg-green-500 text-white text-xs rounded">成功</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- エクスポート -->
+      <div class="mt-4 flex justify-end">
+        <button class="action-btn secondary" data-testid="export-audit-logs">CSVエクスポート</button>
+      </div>
+    </div>
+  </div>
+</div></p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">承認フロー</label>
+                                <select class="form-input">
+                                    <option>1段階承認</option>
+                                    <option>2段階承認</option>
+                                    <option>3段階承認</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">自動通知</label>
+                                <label style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+                                    <input type="checkbox" checked>
+                                    <span>発注作成時にメール通知</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3 class="settings-title">業者管理</h3>
+                            <p class="settings-description">発注先業者の登録・管理を行います</p>
+                            
+                            <button class="btn btn-primary">業者を追加</button>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3 class="settings-title">データ管理</h3>
+                            <p class="settings-description">システムデータのバックアップと復元</p>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn">バックアップ作成</button>
+                                <button class="btn">データインポート</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
-    
+
+    <script>
+        // ページタイトル更新
+        const pageTitles = {
+            'scr-1': 'ダッシュボード',
+            'scr-2': '発注データ一覧', 
+            'scr-3': '詳細・編集',
+            'scr-4': 'システム設定'
+        };
+        
+        function updatePageTitle(screenId) {
+            const titleElement = document.getElementById('current-page-title');
+            if (titleElement && pageTitles[screenId]) {
+                titleElement.textContent = pageTitles[screenId];
+            }
+        }
+        
+        // ナビゲーション状態管理
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('[data-aivic-nav]');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const screenId = this.getAttribute('data-aivic-nav');
+                    updatePageTitle(screenId);
+                });
+            });
+        });
+    </script>
+
     <script>
 (function() {
   var TABLE_DEFS = window.AIVIC_TABLES || [];

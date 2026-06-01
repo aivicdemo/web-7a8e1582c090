@@ -1,12 +1,9 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web発注プラットフォーム構築管理</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Web発注プラットフォーム管理システム</title>
     <script>
 window.AIVIC_API_URL = "https://jqykrkgdvngp7qvmavufg5tohq0xwdzb.lambda-url.us-east-1.on.aws/";
 window.AIVIC_APP_ID = "session-1780284530342";
@@ -14,32 +11,28 @@ window.AIVIC_SYSTEM_NAME = "Web発注プラットフォームの構築";
 window.AIVIC_TABLES = [];
 window.AIVIC_PRESET_SEED = {};
 window.AIVIC_PAGE_SCREEN_ID = "scr-3";
-window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在編集中のプロジェクトID（URLパラメータから取得想定）\n  let currentProjectId = null;\n  \n  // 初期データの設定\n  function initializeForm() {\n    if (tables && tables[0] && tables[0].records && tables[0].records.length > 0) {\n      const project = tables[0].records[0];\n      currentProjectId = project.id;\n      \n      // フォームに既存データを設定\n      const projectName = container.querySelector('#project-name');\n      const projectStatus = container.querySelector('#project-status');\n      const startDate = container.querySelector('#start-date');\n      const endDate = container.querySelector('#end-date');\n      const budget = container.querySelector('#budget');\n      const priority = container.querySelector('#priority');\n      const description = container.querySelector('#description');\n      const frontendTech = container.querySelector('#frontend-tech');\n      const backendTech = container.querySelector('#backend-tech');\n      const database = container.querySelector('#database');\n      const cloudPlatform = container.querySelector('#cloud-platform');\n      \n      if (project.name) projectName.value = project.name;\n      if (project.status) projectStatus.value = project.status;\n      if (project.startDate) startDate.value = project.startDate;\n      if (project.endDate) endDate.value = project.endDate;\n      if (project.budget) budget.value = project.budget;\n      if (project.priority) priority.value = project.priority;\n      if (project.description) description.value = project.description;\n      if (project.frontendTech) frontendTech.value = project.frontendTech;\n      if (project.backendTech) backendTech.value = project.backendTech;\n      if (project.database) database.value = project.database;\n      if (project.cloudPlatform) cloudPlatform.value = project.cloudPlatform;\n    }\n  }\n  \n  // 保存ボタンのイベントリスナー\n  container.querySelector('#save-button').addEventListener('click', async () => {\n    const formData = {\n      name: container.querySelector('#project-name').value,\n      status: container.querySelector('#project-status').value,\n      startDate: container.querySelector('#start-date').value,\n      endDate: container.querySelector('#end-date').value,\n      budget: parseInt(container.querySelector('#budget').value) || 0,\n      priority: container.querySelector('#priority').value,\n      description: container.querySelector('#description').value,\n      frontendTech: container.querySelector('#frontend-tech').value,\n      backendTech: container.querySelector('#backend-tech').value,\n      database: container.querySelector('#database').value,\n      cloudPlatform: container.querySelector('#cloud-platform').value,\n      updatedAt: new Date().toISOString()\n    };\n    \n    try {\n      let result;\n      if (currentProjectId) {\n        // 更新\n        result = await window.aivicApi.update(0, currentProjectId, formData);\n      } else {\n        // 新規作成\n        result = await window.aivicApi.save(0, formData);\n      }\n      \n      if (result) {\n        alert('保存しました');\n        window.showScreen('scr-2'); // 一覧画面に戻る\n      } else {\n        alert('保存に失敗しました');\n      }\n    } catch (error) {\n      console.error('保存エラー:', error);\n      alert('保存中にエラーが発生しました');\n    }\n  });\n  \n  // キャンセルボタンのイベントリスナー\n  container.querySelector('#cancel-button').addEventListener('click', () => {\n    if (confirm('変更を破棄して戻りますか？')) {\n      window.showScreen('scr-2');\n    }\n  });\n  \n  // すべてのタスクを表示ボタン\n  container.querySelector('[data-testid=\"view-all-tasks\"]').addEventListener('click', () => {\n    // タスク管理画面への遷移（仮想的な画面ID）\n    alert('タスク管理画面への遷移機能は今後実装予定です');\n  });\n  \n  // 進捗データの更新（模擬データ）\n  function updateProgressData() {\n    // 実際の実装では API からタスクデータを取得して計算\n    const progressPercentage = container.querySelector('[data-testid=\"progress-percentage\"]');\n    const completedTasks = container.querySelector('[data-testid=\"completed-tasks\"]');\n    const remainingTasks = container.querySelector('[data-testid=\"remaining-tasks\"]');\n    \n    // 模擬的な進捗計算\n    const total = 34;\n    const completed = 12;\n    const remaining = total - completed;\n    const percentage = Math.round((completed / total) * 100);\n    \n    progressPercentage.textContent = `${percentage}%`;\n    completedTasks.textContent = completed.toString();\n    remainingTasks.textContent = remaining.toString();\n  }\n  \n  // 初期化実行\n  initializeForm();\n  updateProgressData();\n  \n  // 定期的な進捗データ更新（実際の実装では WebSocket や定期的な API 呼び出しを使用）\n  setInterval(updateProgressData, 30000); // 30秒ごと\n}";
+window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // タブ切り替え機能\n  const tabButtons = container.querySelectorAll('.tab-btn');\n  const tabContents = container.querySelectorAll('.tab-content');\n  \n  tabButtons.forEach(btn => {\n    btn.addEventListener('click', () => {\n      const targetTab = btn.dataset.tab;\n      \n      // すべてのタブボタンを非アクティブに\n      tabButtons.forEach(b => {\n        b.classList.remove('active', 'border-primary', 'text-primary');\n        b.classList.add('border-transparent', 'text-muted');\n      });\n      \n      // クリックされたタブボタンをアクティブに\n      btn.classList.add('active', 'border-primary', 'text-primary');\n      btn.classList.remove('border-transparent', 'text-muted');\n      \n      // すべてのタブコンテンツを非表示に\n      tabContents.forEach(content => {\n        content.classList.add('hidden');\n      });\n      \n      // 対象のタブコンテンツを表示\n      const targetContent = container.querySelector(`#tab-${targetTab}`);\n      if (targetContent) {\n        targetContent.classList.remove('hidden');\n      }\n    });\n  });\n\n  // 保存ボタンのイベントリスナー\n  container.querySelector('[data-testid=\"save-button\"]').addEventListener('click', async () => {\n    const projectData = {\n      name: container.querySelector('[data-testid=\"project-name-input\"]').value,\n      status: container.querySelector('[data-testid=\"status-select\"]').value,\n      startDate: container.querySelector('[data-testid=\"start-date-input\"]').value,\n      endDate: container.querySelector('[data-testid=\"end-date-input\"]').value,\n      budget: parseInt(container.querySelector('[data-testid=\"budget-input\"]').value),\n      manager: container.querySelector('[data-testid=\"manager-select\"]').value,\n      description: container.querySelector('[data-testid=\"description-input\"]').value,\n      frontendTech: container.querySelector('[data-testid=\"frontend-tech-select\"]').value,\n      backendTech: container.querySelector('[data-testid=\"backend-tech-select\"]').value,\n      database: container.querySelector('[data-testid=\"database-select\"]').value,\n      cloudPlatform: container.querySelector('[data-testid=\"cloud-platform-select\"]').value,\n      techRequirements: container.querySelector('[data-testid=\"tech-requirements-input\"]').value\n    };\n\n    try {\n      const result = await window.aivicApi.update(0, 1, projectData);\n      if (result) {\n        // 成功時の処理\n        const statusDisplay = container.querySelector('[data-testid=\"status-display\"]');\n        statusDisplay.textContent = getStatusText(projectData.status);\n        \n        // 左側の表示も更新\n        container.querySelector('[data-testid=\"project-name-display\"]').textContent = projectData.name;\n        \n        alert('プロジェクト情報を更新しました');\n      } else {\n        alert('保存に失敗しました');\n      }\n    } catch (error) {\n      console.error('Save error:', error);\n      alert('保存中にエラーが発生しました');\n    }\n  });\n\n  // キャンセルボタンのイベントリスナー\n  container.querySelector('[data-testid=\"cancel-button\"]').addEventListener('click', () => {\n    if (confirm('変更を破棄しますか？')) {\n      window.showScreen('scr-2');\n    }\n  });\n\n  // ステータステキスト変換関数\n  function getStatusText(status) {\n    const statusMap = {\n      'planning': '計画中',\n      'in-progress': '進行中',\n      'testing': 'テスト中',\n      'completed': '完了',\n      'on-hold': '保留'\n    };\n    return statusMap[status] || status;\n  }\n\n  // 初期データの読み込み\n  if (tables && tables[0] && tables[0].records && tables[0].records.length > 0) {\n    const project = tables[0].records[0];\n    \n    // フォームに初期値を設定\n    if (project.name) container.querySelector('[data-testid=\"project-name-input\"]').value = project.name;\n    if (project.status) container.querySelector('[data-testid=\"status-select\"]').value = project.status;\n    if (project.startDate) container.querySelector('[data-testid=\"start-date-input\"]').value = project.startDate;\n    if (project.endDate) container.querySelector('[data-testid=\"end-date-input\"]').value = project.endDate;\n    if (project.budget) container.querySelector('[data-testid=\"budget-input\"]').value = project.budget;\n    if (project.manager) container.querySelector('[data-testid=\"manager-select\"]').value = project.manager;\n    if (project.description) container.querySelector('[data-testid=\"description-input\"]').value = project.description;\n  }\n\n  // フォーカス時のスタイル設定\n  const inputs = container.querySelectorAll('input, select, textarea');\n  inputs.forEach(input => {\n    input.addEventListener('focus', () => {\n      input.style.outline = 'none';\n      input.style.borderColor = 'var(--primary)';\n      input.style.boxShadow = '0 0 0 2px rgba(34, 197, 94, 0.08)';\n    });\n    \n    input.addEventListener('blur', () => {\n      input.style.borderColor = 'rgba(0,0,0,0.18)';\n      input.style.boxShadow = 'none';\n    });\n  });\n}";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #2e844a;
-            --primary-hover: #1e5f35;
+            --primary-hover: #1d5f36;
             --primary-light: #e8f5e8;
             --bg-main: #f8f9fa;
             --bg-card: #ffffff;
             --bg-sidebar: #f4f6f9;
-            --border: #e5e5e5;
-            --border-light: #f0f0f0;
+            --border: #d0d7de;
+            --border-light: #e1e8ed;
             --text: #181818;
-            --text-muted: #4a4a4a;
-            --text-light: #6b7280;
+            --text-muted: #57606a;
+            --text-light: #6c757d;
             --top-bar-bg: #ffffff;
-            --top-bar-border: #d8dde6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --radius-sm: 4px;
-            --radius: 6px;
-            --radius-lg: 8px;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --top-bar-border: #d1d9e0;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
         }
 
         * {
@@ -49,30 +42,28 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg-main);
             color: var(--text);
             line-height: 1.4;
             font-size: 14px;
         }
 
-        .app-layout {
+        .app-container {
             display: flex;
             height: 100vh;
-            overflow: hidden;
         }
 
         .sidebar {
-            width: 260px;
+            width: 240px;
             background: var(--bg-sidebar);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
         }
 
         .sidebar-header {
-            padding: 20px 16px 16px;
+            padding: 16px;
             border-bottom: 1px solid var(--border-light);
         }
 
@@ -80,7 +71,7 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
             display: flex;
             align-items: center;
             gap: 8px;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 16px;
             color: var(--text);
         }
@@ -88,64 +79,53 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         .logo-icon {
             width: 28px;
             height: 28px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            border-radius: var(--radius);
+            background: var(--primary);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 12px;
         }
 
-        .nav-section {
-            padding: 16px 12px 8px;
-        }
-
-        .nav-section-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            padding: 0 8px;
+        .nav-menu {
+            flex: 1;
+            padding: 12px 0;
         }
 
         .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            margin: 1px 0;
-            border-radius: var(--radius);
-            color: var(--text-muted);
+            display: block;
+            padding: 8px 16px;
+            color: var(--text);
             text-decoration: none;
-            font-weight: 500;
-            font-size: 13px;
+            border-radius: 0;
+            margin: 0 8px;
+            border-radius: 4px;
             transition: all 0.15s ease;
+            font-size: 14px;
             cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
         }
 
         .nav-item:hover {
             background: rgba(46, 132, 74, 0.08);
-            color: var(--text);
+            color: var(--primary);
         }
 
         .nav-item.aivic-active {
             background: var(--primary-light);
             color: var(--primary);
-            font-weight: 600;
+            font-weight: 500;
         }
 
-        .nav-icon {
-            width: 16px;
-            height: 16px;
-            opacity: 0.8;
+        .nav-section {
+            margin: 16px 0 8px 0;
+            padding: 0 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
         }
 
         .main-content {
@@ -158,12 +138,11 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         .top-bar {
             background: var(--top-bar-bg);
             border-bottom: 1px solid var(--top-bar-border);
-            padding: 0 24px;
-            height: 56px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-shrink: 0;
+            min-height: 56px;
         }
 
         .page-title {
@@ -179,24 +158,23 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         }
 
         .btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
-            border-radius: var(--radius);
-            font-size: 13px;
-            font-weight: 500;
-            text-decoration: none;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text);
-            cursor: pointer;
             transition: all 0.15s ease;
         }
 
         .btn:hover {
-            background: var(--bg-main);
-            border-color: var(--text-light);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .btn-primary {
@@ -208,54 +186,172 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         .btn-primary:hover {
             background: var(--primary-hover);
             border-color: var(--primary-hover);
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: var(--radius-lg);
-            background: var(--bg-main);
-            border: 1px solid var(--border-light);
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        .user-menu:hover {
-            border-color: var(--border);
-        }
-
-        .user-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: white;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .user-name {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
         }
 
         .content-area {
             flex: 1;
             overflow: auto;
-            background: var(--bg-main);
+            padding: 20px;
         }
 
-        .status-indicator {
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .kpi-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .kpi-change.positive {
+            color: var(--success);
+        }
+
+        .kpi-change.negative {
+            color: var(--danger);
+        }
+
+        .data-table {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .search-box {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 13px;
+            width: 240px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .detail-layout {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .detail-main {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 24px;
+        }
+
+        .detail-sidebar {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .settings-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .settings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .settings-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .settings-description {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 2px 6px;
+            padding: 2px 8px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 500;
@@ -264,349 +360,544 @@ window.AIVIC_PAGE_INIT_JS = "function(container, apiUrl, tables) {\n  // 現在�
         }
 
         .status-active {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(40, 167, 69, 0.1);
             color: var(--success);
         }
 
         .status-pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
         }
 
-        .status-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
+        .status-inactive {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--text-muted);
         }
 
         @media (max-width: 768px) {
             .sidebar {
-                width: 240px;
+                width: 200px;
             }
             
-            .top-bar {
-                padding: 0 16px;
+            .dashboard-grid {
+                grid-template-columns: 1fr;
             }
             
-            .page-title {
-                font-size: 16px;
+            .detail-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-area {
+                padding: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="app-layout">
+    <div class="app-container">
         <nav class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <div class="logo-icon">WP</div>
-                    <span>Web発注プラットフォーム</span>
+                    <div class="logo-icon">WO</div>
+                    <span>Web発注システム</span>
                 </div>
             </div>
             
-            <div class="nav-section">
-                <div class="nav-section-title">メイン機能</div>
-                <button class="nav-item" data-aivic-nav="scr-1" onclick="showScreen('scr-1')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                    </svg>
-                    ダッシュボード
-                </button>
+            <div class="nav-menu">
+                <div class="nav-section">メイン</div>
+                <a class="nav-item" data-aivic-nav="scr-1" onclick="showScreen('scr-1')">
+                    📊 ダッシュボード
+                </a>
+                <a class="nav-item" data-aivic-nav="scr-2" onclick="showScreen('scr-2')">
+                    📋 発注データ一覧
+                </a>
+                <a class="nav-item" data-aivic-nav="scr-3" onclick="showScreen('scr-3')">
+                    📝 詳細・編集
+                </a>
                 
-                <button class="nav-item" data-aivic-nav="scr-2" onclick="showScreen('scr-2')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 3a1 1 0 000 2h10a1 1 0 100-2H5zm0 4a1 1 0 100 2h10a1 1 0 100-2H5z" clip-rule="evenodd"/>
-                    </svg>
-                    データ一覧
-                </button>
+                <div class="nav-section">管理</div>
+                <a class="nav-item" data-aivic-nav="scr-4" onclick="showScreen('scr-4')">
+                    ⚙️ システム設定
+                </a>
                 
-                <button class="nav-item" data-aivic-nav="scr-3" onclick="showScreen('scr-3')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                    </svg>
-                    詳細・編集
-                </button>
-            </div>
-            
-            <div class="nav-section">
-                <div class="nav-section-title">管理</div>
-                <button class="nav-item" data-aivic-nav="scr-4" onclick="showScreen('scr-4')">
-                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
-                    </svg>
-                    設定
-                </button>
+                <div class="nav-section">アカウント</div>
+                <a href="./login.html" class="nav-item">
+                    🚪 ログアウト
+                </a>
             </div>
         </nav>
-        
+
         <main class="main-content">
             <header class="top-bar">
-                <h1 class="page-title">Web発注プラットフォーム構築管理</h1>
+                <h1 class="page-title" id="current-page-title">ダッシュボード</h1>
                 <div class="top-bar-actions">
-                    <button class="btn">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-                        </svg>
-                        検索
-                    </button>
-                    <button class="btn btn-primary">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
-                        </svg>
-                        新規作成
-                    </button>
-                    <div class="user-menu">
-                        <div class="user-avatar">管</div>
-                        <span class="user-name">管理者</span>
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
+                    <input type="search" class="search-box" placeholder="検索...">
+                    <button class="btn btn-primary">+ 新規発注</button>
                 </div>
             </header>
-            
+
             <div class="content-area">
-                <div data-aivic-panel="scr-1" style="display:none"></div>
-                <div data-aivic-panel="scr-2" style="display:none"></div>
+                <div data-aivic-panel="scr-1" style="display:none"></span>
+                            </div>
+                            <div class="kpi-value">1,247</div>
+                            <div class="kpi-change positive">+12% 前月比</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">処理中の発注</span>
+                            </div>
+                            <div class="kpi-value">89</div>
+                            <div class="kpi-change">進行中</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">今月の発注額</span>
+                            </div>
+                            <div class="kpi-value">¥2.4M</div>
+                            <div class="kpi-change positive">+8% 前月比</div>
+                        </div>
+                        
+                        <div class="kpi-card">
+                            <div class="kpi-header">
+                                <span class="kpi-title">承認待ち</span>
+                            </div>
+                            <div class="kpi-value">23</div>
+                            <div class="kpi-change">要対応</div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-table">
+                        <div class="table-header">
+                            <h3 class="table-title">最近の発注活動</h3>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p style="color: var(--text-muted); font-size: 13px;">最新の発注データがここに表示されます</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-aivic-panel="scr-2" style="display:none"></button>
+                                <button class="btn">エクスポート</button>
+                            </div>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p style="color: var(--text-muted); font-size: 13px;">発注データの検索・一覧表示機能がここに実装されます</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div data-aivic-panel="scr-3" style="display:block"><div class="flex h-full">
-  <!-- 左側: プロジェクト基本情報 -->
-  <div class="w-1/2 pr-3 border-r border-gray-200">
+  <!-- 左側: 基本情報表示 -->
+  <div class="w-1/3 bg-card border-r border-border p-4 overflow-y-auto">
     <div class="mb-4">
-      <h2 class="text-xl font-semibold text-gray-900 mb-3">プロジェクト基本情報</h2>
-      
-      <div class="card p-4 mb-4">
-        <div class="grid grid-cols-2 gap-4 mb-4">
+      <h2 class="text-lg font-semibold text-text mb-3">プロジェクト基本情報</h2>
+      <div class="space-y-3">
+        <div>
+          <label class="text-sm text-muted block mb-1">プロジェクト名</label>
+          <div class="p-2 bg-main rounded border border-border text-text" data-testid="project-name-display">Web発注プラットフォームの構築</div>
+        </div>
+        <div>
+          <label class="text-sm text-muted block mb-1">ステータス</label>
+          <div class="inline-block px-2 py-1 rounded text-sm bg-primary text-white" data-testid="status-display">進行中</div>
+        </div>
+        <div>
+          <label class="text-sm text-muted block mb-1">開始日</label>
+          <div class="p-2 bg-main rounded border border-border text-text">2024-01-15</div>
+        </div>
+        <div>
+          <label class="text-sm text-muted block mb-1">完了予定日</label>
+          <div class="p-2 bg-main rounded border border-border text-text">2024-06-30</div>
+        </div>
+        <div>
+          <label class="text-sm text-muted block mb-1">予算</label>
+          <div class="p-2 bg-main rounded border border-border text-text">¥15,000,000</div>
+        </div>
+        <div>
+          <label class="text-sm text-muted block mb-1">担当者</label>
+          <div class="p-2 bg-main rounded border border-border text-text">田中 太郎</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 進捗情報 -->
+    <div class="mb-4">
+      <h3 class="text-md font-medium text-text mb-3">進捗状況</h3>
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm">
+          <span class="text-muted">全体進捗</span>
+          <span class="text-text font-medium">65%</span>
+        </div>
+        <div class="w-full bg-main rounded-full h-2">
+          <div class="bg-primary h-2 rounded-full" style="width: 65%"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <div class="text-center p-2 bg-main rounded">
+            <div class="text-lg font-semibold text-primary">8</div>
+            <div class="text-xs text-muted">完了タスク</div>
+          </div>
+          <div class="text-center p-2 bg-main rounded">
+            <div class="text-lg font-semibold text-text">4</div>
+            <div class="text-xs text-muted">残りタスク</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- アクションボタン -->
+    <div class="space-y-2">
+      <button class="action-btn w-full" data-testid="dashboard-button" onclick="window.showScreen('scr-1')">
+        ダッシュボードへ
+      </button>
+      <button class="action-btn secondary w-full" data-testid="list-button" onclick="window.showScreen('scr-2')">
+        データ一覧
+      </button>
+    </div>
+  </div>
+
+  <!-- 右側: 編集フォーム -->
+  <div class="flex-1 p-4 overflow-y-auto">
+    <div class="max-w-4xl">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-bold text-text">プロジェクト詳細編集</h1>
+        <button class="action-btn secondary" data-testid="settings-button" onclick="window.showScreen('scr-4')">
+          設定
+        </button>
+      </div>
+
+      <!-- タブナビゲーション -->
+      <div class="border-b border-border mb-4">
+        <nav class="flex space-x-6">
+          <button class="tab-btn active py-2 px-1 border-b-2 border-primary text-primary font-medium" data-tab="basic">
+            基本設定
+          </button>
+          <button class="tab-btn py-2 px-1 border-b-2 border-transparent text-muted hover:text-text" data-tab="technical">
+            技術仕様
+          </button>
+          <button class="tab-btn py-2 px-1 border-b-2 border-transparent text-muted hover:text-text" data-tab="timeline">
+            スケジュール
+          </button>
+          <button class="tab-btn py-2 px-1 border-b-2 border-transparent text-muted hover:text-text" data-tab="resources">
+            リソース
+          </button>
+        </nav>
+      </div>
+
+      <!-- 基本設定タブ -->
+      <div id="tab-basic" class="tab-content">
+        <div class="grid grid-cols-2 gap-4 mb-6">
           <div>
-            <label class="block text-sm text-gray-600 mb-1">プロジェクト名</label>
-            <input type="text" id="project-name" data-testid="project-name" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" value="Web発注プラットフォーム構築">
+            <label class="text-sm text-muted block mb-1">プロジェクト名</label>
+            <input type="text" class="input w-full" data-testid="project-name-input" value="Web発注プラットフォームの構築" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
           </div>
           <div>
-            <label class="block text-sm text-gray-600 mb-1">ステータス</label>
-            <select id="project-status" data-testid="project-status" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+            <label class="text-sm text-muted block mb-1">ステータス</label>
+            <select class="input w-full" data-testid="status-select" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
               <option value="">選択してください</option>
-              <option value="planning" selected>企画中</option>
-              <option value="development">開発中</option>
+              <option value="planning" selected>計画中</option>
+              <option value="in-progress">進行中</option>
               <option value="testing">テスト中</option>
               <option value="completed">完了</option>
-              <option value="suspended">中断</option>
+              <option value="on-hold">保留</option>
             </select>
           </div>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label class="block text-sm text-gray-600 mb-1">開始予定日</label>
-            <input type="date" id="start-date" data-testid="start-date" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" value="2024-02-01">
+            <label class="text-sm text-muted block mb-1">開始日</label>
+            <input type="date" class="input w-full" data-testid="start-date-input" value="2024-01-15" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
           </div>
           <div>
-            <label class="block text-sm text-gray-600 mb-1">完了予定日</label>
-            <input type="date" id="end-date" data-testid="end-date" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" value="2024-08-31">
-          </div>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="block text-sm text-gray-600 mb-1">予算</label>
-            <input type="number" id="budget" data-testid="budget" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50" value="5000000">
+            <label class="text-sm text-muted block mb-1">完了予定日</label>
+            <input type="date" class="input w-full" data-testid="end-date-input" value="2024-06-30" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
           </div>
           <div>
-            <label class="block text-sm text-gray-600 mb-1">優先度</label>
-            <select id="priority" data-testid="priority" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+            <label class="text-sm text-muted block mb-1">予算</label>
+            <input type="number" class="input w-full" data-testid="budget-input" value="15000000" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
+          </div>
+          <div>
+            <label class="text-sm text-muted block mb-1">担当者</label>
+            <select class="input w-full" data-testid="manager-select" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
               <option value="">選択してください</option>
-              <option value="high" selected>高</option>
-              <option value="medium">中</option>
-              <option value="low">低</option>
+              <option value="tanaka" selected>田中 太郎</option>
+              <option value="suzuki">鈴木 花子</option>
+              <option value="sato">佐藤 次郎</option>
+              <option value="takahashi">高橋 美咲</option>
             </select>
           </div>
         </div>
-        
-        <div class="mb-4">
-          <label class="block text-sm text-gray-600 mb-1">プロジェクト概要</label>
-          <textarea id="description" data-testid="description" rows="4" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">企業向けWeb発注プラットフォームの構築。見積もり管理、発注処理、進捗管理機能を含む統合システムの開発。</textarea>
+        <div class="mb-6">
+          <label class="text-sm text-muted block mb-1">プロジェクト概要</label>
+          <textarea class="input w-full h-24" data-testid="description-input" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">企業向けWeb発注プラットフォームの構築プロジェクト。見積もり管理、発注処理、進捗追跡機能を含む統合システムの開発を行う。</textarea>
         </div>
       </div>
-    </div>
-    
-    <!-- 技術要件 -->
-    <div class="card p-4">
-      <h3 class="text-lg font-medium text-gray-900 mb-3">技術要件</h3>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="block text-sm text-gray-600 mb-1">フロントエンド技術</label>
-          <select id="frontend-tech" data-testid="frontend-tech" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-            <option value="">選択してください</option>
-            <option value="react" selected>React</option>
-            <option value="vue">Vue.js</option>
-            <option value="angular">Angular</option>
-            <option value="vanilla">Vanilla JS</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm text-gray-600 mb-1">バックエンド技術</label>
-          <select id="backend-tech" data-testid="backend-tech" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-            <option value="">選択してください</option>
-            <option value="nodejs" selected>Node.js</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="php">PHP</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm text-gray-600 mb-1">データベース</label>
-          <select id="database" data-testid="database" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-            <option value="">選択してください</option>
-            <option value="postgresql" selected>PostgreSQL</option>
-            <option value="mysql">MySQL</option>
-            <option value="mongodb">MongoDB</option>
-            <option value="sqlite">SQLite</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm text-gray-600 mb-1">クラウド環境</label>
-          <select id="cloud-platform" data-testid="cloud-platform" class="input w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-            <option value="">選択してください</option>
-            <option value="aws" selected>AWS</option>
-            <option value="azure">Azure</option>
-            <option value="gcp">Google Cloud</option>
-            <option value="vercel">Vercel</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- 右側: プロジェクト進捗とタスク管理 -->
-  <div class="w-1/2 pl-3">
-    <!-- 進捗状況 -->
-    <div class="mb-4">
-      <h2 class="text-xl font-semibold text-gray-900 mb-3">進捗状況</h2>
-      
-      <div class="grid grid-cols-3 gap-3 mb-4">
-        <div class="card p-3 text-center">
-          <div class="text-2xl font-bold text-green-600" data-testid="progress-percentage">35%</div>
-          <div class="text-sm text-gray-600">全体進捗</div>
-        </div>
-        <div class="card p-3 text-center">
-          <div class="text-2xl font-bold text-blue-600" data-testid="completed-tasks">12</div>
-          <div class="text-sm text-gray-600">完了タスク</div>
-        </div>
-        <div class="card p-3 text-center">
-          <div class="text-2xl font-bold text-orange-600" data-testid="remaining-tasks">22</div>
-          <div class="text-sm text-gray-600">残りタスク</div>
-        </div>
-      </div>
-      
-      <div class="card p-4 mb-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-3">フェーズ別進捗</h3>
-        <div class="space-y-3">
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span>要件定義</span>
-              <span class="text-green-600">100%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span>設計</span>
-              <span class="text-blue-600">75%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-blue-500 h-2 rounded-full" style="width: 75%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span>開発</span>
-              <span class="text-orange-600">25%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-orange-500 h-2 rounded-full" style="width: 25%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-sm mb-1">
-              <span>テスト</span>
-              <span class="text-gray-600">0%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 最近のタスク -->
-    <div class="card p-4">
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="text-lg font-medium text-gray-900">最近のタスク</h3>
-        <button class="action-btn secondary text-sm" data-testid="view-all-tasks">すべて表示</button>
-      </div>
-      
-      <div class="space-y-2" data-testid="recent-tasks">
-        <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-          <div class="flex items-center">
-            <div class="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-            <span class="text-sm">データベース設計完了</span>
-          </div>
-          <span class="text-xs text-gray-500">2024-01-15</span>
-        </div>
-        <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-          <div class="flex items-center">
-            <div class="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-            <span class="text-sm">API仕様書作成中</span>
-          </div>
-          <span class="text-xs text-gray-500">2024-01-14</span>
-        </div>
-        <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-          <div class="flex items-center">
-            <div class="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-            <span class="text-sm">UI/UXデザイン検討</span>
-          </div>
-          <span class="text-xs text-gray-500">2024-01-13</span>
-        </div>
-        <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
-          <div class="flex items-center">
-            <div class="w-2 h-2 bg-gray-400 rounded-full mr-3"></div>
-            <span class="text-sm">セキュリティ要件定義</span>
-          </div>
-          <span class="text-xs text-gray-500">2024-01-12</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- 下部: アクションボタン -->
-<div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-  <div class="flex space-x-2">
-    <button class="action-btn secondary" data-testid="back-button" onclick="window.showScreen('scr-2')">
-      ← 一覧に戻る
-    </button>
-    <button class="action-btn secondary" data-testid="dashboard-button" onclick="window.showScreen('scr-1')">
-      ダッシュボード
-    </button>
+      <!-- 技術仕様タブ -->
+      <div id="tab-technical" class="tab-content hidden">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="text-sm text-muted block mb-1">フロントエンド技術</label>
+            <select class="input w-full" data-testid="frontend-tech-select" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
+              <option value="">選択してください</option>
+              <option value="react" selected>React</option>
+              <option value="vue">Vue.js</option>
+              <option value="angular">Angular</option>
+              <option value="vanilla">Vanilla JS</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-muted block mb-1">バックエンド技術</label>
+            <select class="input w-full" data-testid="backend-tech-select" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
+              <option value="">選択してください</option>
+              <option value="nodejs" selected>Node.js</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="php">PHP</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-muted block mb-1">データベース</label>
+            <select class="input w-full" data-testid="database-select" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
+              <option value="">選択してください</option>
+              <option value="postgresql" selected>PostgreSQL</option>
+              <option value="mysql">MySQL</option>
+              <option value="mongodb">MongoDB</option>
+              <option value="oracle">Oracle</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-muted block mb-1">クラウドプラットフォーム</label>
+            <select class="input w-full" data-testid="cloud-platform-select" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">
+              <option value="">選択してください</option>
+              <option value="aws" selected>AWS</option>
+              <option value="azure">Azure</option>
+              <option value="gcp">Google Cloud</option>
+              <option value="on-premise">オンプレミス</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-6">
+          <label class="text-sm text-muted block mb-1">技術要件</label>
+          <textarea class="input w-full h-32" data-testid="tech-requirements-input" style="background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.18); padding: 8px 12px; border-radius: 4px;">・レスポンシブデザイン対応
+・API設計（RESTful）
+・セキュリティ対策（認証・認可）
+・パフォーマンス最適化
+・テスト自動化</textarea>
+        </div>
+      </div>
+
+      <!-- スケジュールタブ -->
+      <div id="tab-timeline" class="tab-content hidden">
+        <div class="mb-6">
+          <h3 class="text-md font-medium text-text mb-3">マイルストーン</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-card rounded border border-border">
+              <div>
+                <div class="font-medium text-text">要件定義完了</div>
+                <div class="text-sm text-muted">2024-02-15</div>
+              </div>
+              <div class="px-2 py-1 bg-primary text-white text-xs rounded">完了</div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-card rounded border border-border">
+              <div>
+                <div class="font-medium text-text">設計フェーズ完了</div>
+                <div class="text-sm text-muted">2024-03-30</div>
+              </div>
+              <div class="px-2 py-1 bg-primary text-white text-xs rounded">完了</div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-card rounded border border-border">
+              <div>
+                <div class="font-medium text-text">開発フェーズ完了</div>
+                <div class="text-sm text-muted">2024-05-31</div>
+              </div>
+              <div class="px-2 py-1 text-text text-xs rounded" style="background: rgba(255,165,0,0.2);">進行中</div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-card rounded border border-border">
+              <div>
+                <div class="font-medium text-text">テスト・リリース</div>
+                <div class="text-sm text-muted">2024-06-30</div>
+              </div>
+              <div class="px-2 py-1 text-muted text-xs rounded" style="background: rgba(128,128,128,0.2);">予定</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- リソースタブ -->
+      <div id="tab-resources" class="tab-content hidden">
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-md font-medium text-text mb-3">チームメンバー</h3>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between p-2 bg-card rounded">
+                <div>
+                  <div class="font-medium text-text">田中 太郎</div>
+                  <div class="text-sm text-muted">プロジェクトマネージャー</div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-2 bg-card rounded">
+                <div>
+                  <div class="font-medium text-text">鈴木 花子</div>
+                  <div class="text-sm text-muted">フロントエンド開発者</div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between p-2 bg-card rounded">
+                <div>
+                  <div class="font-medium text-text">佐藤 次郎</div>
+                  <div class="text-sm text-muted">バックエンド開発者</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-md font-medium text-text mb-3">予算配分</h3>
+            <div class="space-y-2">
+              <div class="flex justify-between p-2 bg-card rounded">
+                <span class="text-text">開発費</span>
+                <span class="font-medium text-text">¥10,000,000</span>
+              </div>
+              <div class="flex justify-between p-2 bg-card rounded">
+                <span class="text-text">インフラ費</span>
+                <span class="font-medium text-text">¥2,000,000</span>
+              </div>
+              <div class="flex justify-between p-2 bg-card rounded">
+                <span class="text-text">その他</span>
+                <span class="font-medium text-text">¥3,000,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 保存ボタン -->
+      <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-border">
+        <button class="action-btn secondary" data-testid="cancel-button">
+          キャンセル
+        </button>
+        <button class="action-btn" data-testid="save-button">
+          保存
+        </button>
+      </div>
+    </div>
   </div>
-  
-  <div class="flex space-x-2">
-    <button class="action-btn secondary" data-testid="cancel-button">
-      キャンセル
-    </button>
-    <button class="action-btn" data-testid="save-button" style="background: var(--primary); color: #fff;">
-      保存
-    </button>
-  </div>
-</div></div>
-                <div data-aivic-panel="scr-4" style="display:none"></div>
+</div></label>
+                                <input type="text" class="form-input" placeholder="WO-2024-001">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">発注先</label>
+                                <input type="text" class="form-input" placeholder="業者名を入力">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">発注内容</label>
+                                <textarea class="form-input" rows="4" placeholder="発注内容の詳細"></textarea>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label">発注金額</label>
+                                    <input type="number" class="form-input" placeholder="0">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">納期</label>
+                                    <input type="date" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                                <button class="btn btn-primary">保存</button>
+                                <button class="btn">キャンセル</button>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-sidebar">
+                            <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 600;">発注ステータス</h3>
+                            <div style="margin-bottom: 16px;">
+                                <span class="status-badge status-pending">承認待ち</span>
+                            </div>
+                            
+                            <h4 style="margin: 20px 0 8px 0; font-size: 14px; font-weight: 600;">履歴</h4>
+                            <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+                                <p>2024/01/15 - 発注作成</p>
+                                <p>2024/01/16 - 承認申請</p>
+                            </div>
+                            
+                            <h4 style="margin: 20px 0 8px 0; font-size: 14px; font-weight: 600;">添付ファイル</h4>
+                            <button class="btn" style="width: 100%; margin-bottom: 8px;">+ ファイル追加</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-aivic-panel="scr-4" style="display:none"></p>
+                            
+                            <div class="form-group">
+                                <label class="form-label">承認フロー</label>
+                                <select class="form-input">
+                                    <option>1段階承認</option>
+                                    <option>2段階承認</option>
+                                    <option>3段階承認</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">自動通知</label>
+                                <label style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+                                    <input type="checkbox" checked>
+                                    <span>発注作成時にメール通知</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3 class="settings-title">業者管理</h3>
+                            <p class="settings-description">発注先業者の登録・管理を行います</p>
+                            
+                            <button class="btn btn-primary">業者を追加</button>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3 class="settings-title">データ管理</h3>
+                            <p class="settings-description">システムデータのバックアップと復元</p>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn">バックアップ作成</button>
+                                <button class="btn">データインポート</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
-    
+
+    <script>
+        // ページタイトル更新
+        const pageTitles = {
+            'scr-1': 'ダッシュボード',
+            'scr-2': '発注データ一覧', 
+            'scr-3': '詳細・編集',
+            'scr-4': 'システム設定'
+        };
+        
+        function updatePageTitle(screenId) {
+            const titleElement = document.getElementById('current-page-title');
+            if (titleElement && pageTitles[screenId]) {
+                titleElement.textContent = pageTitles[screenId];
+            }
+        }
+        
+        // ナビゲーション状態管理
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('[data-aivic-nav]');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const screenId = this.getAttribute('data-aivic-nav');
+                    updatePageTitle(screenId);
+                });
+            });
+        });
+    </script>
+
     <script>
 (function() {
   var TABLE_DEFS = window.AIVIC_TABLES || [];
